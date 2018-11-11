@@ -39,7 +39,7 @@ func BenchAddBatchAt(b *testing.B, store ds.Batching, opt BenchOptions, keys []d
 	}
 }
 
-func BenchAddBatchSeriesOf(b *testing.B, newStore CandidateDatastore, opts []BenchOptions) {
+func BenchAddBatchSeries(b *testing.B, newStore CandidateDatastore, opts []BenchOptions) {
 	for _, opt := range opts {
 		store, err := newStore.Create()
 		if err != nil {
@@ -59,8 +59,4 @@ func BenchAddBatchSeriesOf(b *testing.B, newStore CandidateDatastore, opts []Ben
 		})
 		newStore.Destroy(store)
 	}
-}
-
-func BenchAddBatchSeriesDefault(b *testing.B, newStore CandidateDatastore) {
-	BenchAddBatchSeriesOf(b, newStore, DefaultBenchOpts)
 }

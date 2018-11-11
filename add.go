@@ -7,8 +7,6 @@ import (
 	ds "github.com/ipfs/go-datastore"
 )
 
-type StoreGen func() (ds.Batching, error)
-
 func BenchAddAt(b *testing.B, store ds.Batching, opt BenchOptions, keys []ds.Key, bufs [][]byte) {
 	//PrimeDS(b, store, opt.PrePrimeCount, opt.RecordSize)
 	b.SetBytes(int64(opt.RecordSize))
@@ -22,7 +20,7 @@ func BenchAddAt(b *testing.B, store ds.Batching, opt BenchOptions, keys []ds.Key
 	}
 }
 
-func BenchAddSeriesOf(b *testing.B, newStore CandidateDatastore, opts []BenchOptions) {
+func BenchAddSeries(b *testing.B, newStore CandidateDatastore, opts []BenchOptions) {
 	for _, opt := range opts {
 		store, err := newStore.Create()
 		if err != nil {
@@ -44,6 +42,3 @@ func BenchAddSeriesOf(b *testing.B, newStore CandidateDatastore, opts []BenchOpt
 	}
 }
 
-func BenchAddSeriesDefault(b *testing.B, newStore CandidateDatastore) {
-	BenchAddSeriesOf(b, newStore, DefaultBenchOpts)
-}
