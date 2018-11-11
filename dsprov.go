@@ -6,8 +6,8 @@ import (
 
 	ds "github.com/ipfs/go-datastore"
 	flatfs "github.com/ipfs/go-ds-flatfs"
-	sbs "github.com/ipfs/go-sbs"
-	bolt "github.com/whyrusleeping/bolt-datastore"
+	//sbs "github.com/ipfs/go-sbs"
+	//bolt "github.com/whyrusleeping/bolt-datastore"
 )
 
 func emptyDtor(ds.Batching) {
@@ -15,8 +15,8 @@ func emptyDtor(ds.Batching) {
 
 var AllCandidates = []CandidateDatastore{
 	CandidateMemoryMap,
-	CandidateFsbs,
-	CandidateBolt,
+	//CandidateFsbs,
+	//CandidateBolt,
 	CandidateFlatfs,
 	CandidateFlatfsNoSync,
 }
@@ -29,7 +29,7 @@ var CandidateMemoryMap = CandidateDatastore{
 	Destroy: emptyDtor,
 }
 
-var CandidateBolt = CandidateDatastore{
+/*var CandidateBolt = CandidateDatastore{
 	Name: "bolt",
 	Create: func() (ds.Batching, error) {
 		os.Mkdir("bolt", 0775)
@@ -75,7 +75,7 @@ var CandidateFsbs = CandidateDatastore{
 		os.Remove(b.(*sbs.Sbsds).Path)
 	},
 }
-
+*/
 func flatfsCtor(sync bool) func() (ds.Batching, error) {
 	return func() (ds.Batching, error) {
 		os.Mkdir("flatfs", 0775)
