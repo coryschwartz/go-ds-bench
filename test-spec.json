@@ -1,0 +1,21 @@
+{
+  "Datastores": [
+    {
+      "Type": "memory-map",
+      "Name": "mem",
+      "Tags": ["memory"]
+    },
+    {
+      "Type": "flatfs",
+      "Name": "flatfs",
+      "Tags": ["persistent", "safe"],
+      "Params":{"DataDir": "~/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "flatfs",
+      "Name": "flatfs-nosync",
+      "Tags": ["persistent"],
+      "Params":{"DataDir": "~/ds-bench", "Sync": false}
+    }
+  ]
+}

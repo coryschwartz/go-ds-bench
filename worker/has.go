@@ -1,13 +1,14 @@
-package main
+package worker
 
 import (
+	"github.com/ipfs/go-ds-bench/options"
 	"testing"
 
 	ds "github.com/ipfs/go-datastore"
 )
 
-func BenchHasAt(b *testing.B, store ds.Batching, opt BenchOptions) {
-	PrimeDS(b, store, opt.PrePrimeCount, opt.RecordSize)
+func BenchHasAt(b *testing.B, store ds.Batching, opt options.BenchOptions) {
+	PrimeDS(b, store, opt.PrimeRecordCount, opt.RecordSize)
 	buf := make([]byte, opt.RecordSize)
 	keys := make([]ds.Key, b.N)
 	for i := 0; i < b.N; i++ {
@@ -29,16 +30,16 @@ func BenchHasAt(b *testing.B, store ds.Batching, opt BenchOptions) {
 	}
 }
 
-func BenchHasSeries(b *testing.B, newStore CandidateDatastore, opts []BenchOptions) {
+func BenchHasSeries(b *testing.B, newStore CandidateDatastore, opts []options.BenchOptions) {
 	for _, opt := range opts {
-		store, err := newStore.Create()
-		if err != nil {
-			b.Fatal(err)
-		}
 
 		b.Run(opt.TestDesc(), func(b *testing.B) {
+			store, err := newStore.Create()
+			if err != nil {
+				b.Fatal(err)
+			}
 			BenchHasAt(b, store, opt)
+			newStore.Destroy(store)
 		})
-		newStore.Destroy(store)
 	}
 }

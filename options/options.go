@@ -1,20 +1,35 @@
-package main
+package options
 
 import "fmt"
 
+type WorkerDatastore struct {
+	Type string
+	Name string
+	Tags []string
+
+	Params map[string]interface{} //ds specific
+}
+
+type TestSpec struct {
+	Datastore WorkerDatastore
+
+	Test    string
+	Options BenchOptions
+}
+
 type BenchOptions struct {
-	PrePrimeCount int // number of records in the datastore before the test
-	RecordSize    int // size of one record
-	BatchSize     int // size of the batch, only appies to batched operations
+	PrimeRecordCount int // number of records in the datastore before the test
+	RecordSize       int // size of one record
+	BatchSize        int // size of the batch, only applies to batched operations
 }
 
 func (opt BenchOptions) TestDesc() string {
-	return fmt.Sprintf("pre=%d-size=%d-batch=%d", opt.PrePrimeCount, opt.RecordSize, opt.BatchSize)
+	return fmt.Sprintf("pre=%d-size=%d-batch=%d", opt.PrimeRecordCount, opt.RecordSize, opt.BatchSize)
 }
 
 var DefaultBenchOpts = OptionsRange2pow(
-	BenchOptions{1, 10 << 10, 64},
-	BenchOptions{1 << 20, 10 << 10, 64}, 3)
+	BenchOptions{1, 250 << 10, 64},
+	BenchOptions{1 << 12, 250 << 10, 64}, 3)
 
 func OptionsRange2pow(start, end BenchOptions, countPerAxis int) []BenchOptions {
 	res := []BenchOptions{start}
@@ -26,16 +41,16 @@ func OptionsRange2pow(start, end BenchOptions, countPerAxis int) []BenchOptions 
 	axis := make([]float64, countPerAxis)
 	maxN := 1 << uint(countPerAxis)
 	for i := 0; i < countPerAxis-1; i++ {
-		axis[i] = float64(uint(1)<<uint(i+1)) / float64(maxN)
+		axis[i] = float64(uint(1)<<uint(i)) / float64(maxN)
 	}
 	axis[countPerAxis-1] = 1
 
-	if start.PrePrimeCount != end.PrePrimeCount {
+	if start.PrimeRecordCount != end.PrimeRecordCount {
 		bRes := res[:]
 		res = make([]BenchOptions, 0, countPerAxis*len(bRes))
 		for _, opt := range bRes {
 			for _, scale := range axis {
-				opt.PrePrimeCount = int(float64(end.PrePrimeCount-start.PrePrimeCount)*scale) + start.PrePrimeCount
+				opt.PrimeRecordCount = int(float64(end.PrimeRecordCount-start.PrimeRecordCount)*scale) + start.PrimeRecordCount
 				res = append(res, opt)
 			}
 		}
