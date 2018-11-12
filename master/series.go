@@ -52,3 +52,12 @@ func (s *Series) benchSeries(f ...DsFilter) error {
 	}
 	return ioutil.WriteFile("results-"+s.PlotName+".json", b, 0664)
 }
+
+func (s *Series) loadExistingResults() error {
+	b, err := ioutil.ReadFile("results-" + s.PlotName + ".json")
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(b, s)
+}

@@ -10,25 +10,36 @@ import (
 func defaultBench(s *Series) error {
 	if err := s.benchSeries(NoTag("memory")); err != nil {
 		if err == ErrExists {
-			log.Printf("SKIPPING %s", s.PlotName)
-			return nil
+			log.Printf("SKIPPING %s (using existing results)", s.PlotName)
+			if err := s.loadExistingResults(); err != nil {
+				return err
+			}
+		} else {
+			return err
 		}
+	}
+
+	if err := s.plot(xselPrimeRecs, yselNsPerOp, plot.LinearScale{}, TimeTicks{plot.DefaultTicks{}}, ""); err != nil {
 		return err
 	}
 
-	if err := s.plot(xselPrimeRecs, yselNsPerOp, plot.LogScale{}, plot.LinearScale{}, ""); err != nil {
+	if err := s.plot(xselPrimeRecs, yselNsPerOp, plot.LogScale{}, TimeTicks{Log2Ticks{}}, "-log"); err != nil {
 		return err
 	}
 
-	if err := s.plot(xselPrimeRecs, yselNsPerOp, plot.LogScale{}, plot.LogScale{}, "-log"); err != nil {
+	if err := s.plot(xselPrimeRecs, yselAllocs, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
 		return err
 	}
 
-	if err := s.plot(xselPrimeRecs, yselAllocs, plot.LogScale{}, plot.LinearScale{}, ""); err != nil {
+	if err := s.plot(xselPrimeRecs, yselAllocs, plot.LogScale{}, Log2Ticks{}, "-log"); err != nil {
 		return err
 	}
 
-	if err := s.plot(xselPrimeRecs, yselMBps, plot.LogScale{}, plot.LinearScale{}, ""); err != nil {
+	if err := s.plot(xselPrimeRecs, yselMBps, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
+		return err
+	}
+
+	if err := s.plot(xselPrimeRecs, yselMBps, ZeroLogScale{}, Log2Ticks{}, "-log"); err != nil {
 		return err
 	}
 

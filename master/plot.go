@@ -2,7 +2,10 @@ package master
 
 import (
 	"fmt"
+	"math"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ipfs/go-ds-bench/options"
 
@@ -51,7 +54,7 @@ var xselPrimeRecs = &xsel{
 	},
 }
 
-func (s *Series) plot(x *xsel, y *ysel, xscale, yscale plot.Normalizer, suffix string) error {
+func (s *Series) plot(x *xsel, y *ysel, yscale plot.Normalizer, ymarker plot.Ticker, suffix string) error {
 	p, err := plot.New()
 	if err != nil {
 		return err
@@ -60,8 +63,13 @@ func (s *Series) plot(x *xsel, y *ysel, xscale, yscale plot.Normalizer, suffix s
 	p.Title.Text = s.PlotName
 	p.Y.Label.Text = y.name
 	p.X.Label.Text = x.name
-	p.X.Scale = xscale
+	p.X.Scale = plot.LogScale{}
 	p.Y.Scale = yscale
+	p.Legend.Top = true
+	p.X.Tick.Marker = Log2Ticks{}
+	p.Y.Tick.Marker = ymarker
+
+	p.Add(plotter.NewGrid())
 
 	var lp []interface{}
 	for dsname, p := range s.Results {
@@ -80,5 +88,68 @@ func (s *Series) plot(x *xsel, y *ysel, xscale, yscale plot.Normalizer, suffix s
 
 	plotName := fmt.Sprintf("plot-%s-%s-%s%s.png", s.PlotName, x.name, y.name, suffix)
 	plotName = strings.Replace(plotName, "/", "", -1)
-	return p.Save(4*vg.Inch, 4*vg.Inch, plotName)
+	return p.Save(8*vg.Inch, 4*vg.Inch, plotName)
+}
+
+type Log2Ticks struct{}
+
+var _ plot.Ticker = Log2Ticks{}
+
+// Ticks returns Ticks in a specified range
+func (t Log2Ticks) Ticks(min, max float64) []plot.Tick {
+	if min < 0 {
+		min = 1
+	}
+
+	val := math.Pow(2, math.Log2(min))
+	max = math.Pow(2, math.Ceil(math.Log2(max)))
+	var ticks []plot.Tick
+	for val < max {
+		for i := 1; i < 4; i++ {
+			if i == 1{
+				ticks = append(ticks, plot.Tick{Value: val, Label: formatFloatTick(val)})
+			}
+			ticks = append(ticks, plot.Tick{Value: val * float64(i)})
+		}
+		val *= 4
+	}
+	ticks = append(ticks, plot.Tick{Value: val, Label: formatFloatTick(val)})
+
+	return ticks
+}
+
+func formatFloatTick(v float64) string {
+	return strconv.FormatFloat(v, 'f', 2, 64)
+}
+
+// TimeTicks is suitable for axes representing time values.
+type TimeTicks struct {
+	Ticker plot.Ticker
+}
+
+// Ticks implements plot.Ticker.
+func (t TimeTicks) Ticks(min, max float64) []plot.Tick {
+	if t.Ticker == nil {
+		t.Ticker = Log2Ticks{}
+	}
+
+	ticks := t.Ticker.Ticks(min, max)
+	for i := range ticks {
+		tick := &ticks[i]
+		if tick.Label == "" {
+			continue
+		}
+		tick.Label = time.Duration(tick.Value).String()
+	}
+	return ticks
+}
+
+// hacky version of logscale which doesn't panic
+type ZeroLogScale struct{}
+
+// Normalize returns the fractional logarithmic distance of
+// x between min and max.
+func (ZeroLogScale) Normalize(min, max, x float64) float64 {
+	logMin := math.Log(min)
+	return (math.Log(x) - logMin) / (math.Log(max) - logMin)
 }
