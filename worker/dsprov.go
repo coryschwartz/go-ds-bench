@@ -18,9 +18,9 @@ type CandidateDatastore struct {
 	Destroy func(ds.Batching)
 }
 
-var datastores = map[string]func(options.WorkerDatastore)CandidateDatastore{
+var datastores = map[string]func(options.WorkerDatastore) CandidateDatastore{
 	"memory-map": CandidateMemoryMap,
-	"flatfs": CandidateFlatfs,
+	"flatfs":     CandidateFlatfs,
 }
 
 var CandidateMemoryMap = func(options.WorkerDatastore) CandidateDatastore {
@@ -34,7 +34,7 @@ var CandidateMemoryMap = func(options.WorkerDatastore) CandidateDatastore {
 
 var CandidateFlatfs = func(spec options.WorkerDatastore) CandidateDatastore {
 	return CandidateDatastore{
-		Create:  func() (ds.Batching, error) {
+		Create: func() (ds.Batching, error) {
 			d, err := homedir.Expand(spec.Params["DataDir"].(string))
 			if err != nil {
 				return nil, err

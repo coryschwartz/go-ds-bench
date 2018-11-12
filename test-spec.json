@@ -9,13 +9,13 @@
       "Type": "flatfs",
       "Name": "flatfs",
       "Tags": ["persistent", "safe"],
-      "Params":{"DataDir": "~/ds-bench", "Sync": true}
+      "Params":{"DataDir": "/tmp/ds-bench", "Sync": true}
     },
     {
       "Type": "flatfs",
       "Name": "flatfs-nosync",
       "Tags": ["persistent"],
-      "Params":{"DataDir": "~/ds-bench", "Sync": false}
+      "Params":{"DataDir": "/tmp/ds-bench", "Sync": false}
     }
   ]
 }
