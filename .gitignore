@@ -25,3 +25,6 @@ _testmain.go
 bolt
 flatfs
 sbs
+
+plot*.png
+results*json
