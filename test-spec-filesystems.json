@@ -1,0 +1,147 @@
+{
+  "Datastores": [
+    {
+      "Type": "memory-map",
+      "Name": "mem",
+      "Tags": ["memory"]
+    },
+    {
+      "Type": "flatfs",
+      "Name": "flatfs-nosync",
+      "Tags": ["persistent"],
+      "Params": {"DataDir": "~/ds-bench", "Sync": false}
+    },
+    {
+      "Type": "flatfs",
+      "Name": "flatfs-ntfs",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh ntfs /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "flatfs",
+      "Name": "flatfs-ext4",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh ext4 /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "flatfs",
+      "Name": "flatfs-xfs",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh xfs /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "flatfs",
+      "Name": "flatfs-btrfs",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh btrfs /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "badger",
+      "Name": "badger-nosync",
+      "Tags": ["persistent","db"],
+      "Params": {"DataDir": "~/ds-bench", "Sync": false}
+    },
+    {
+      "Type": "badger",
+      "Name": "badger-ntfs",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh ntfs /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "badger",
+      "Name": "badger-ext4",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh ext4 /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "badger",
+      "Name": "badger-xfs",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh xfs /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "badger",
+      "Name": "badger-btrfs",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh btrfs /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "leveldb",
+      "Name": "leveldb-nosync",
+      "Tags": ["persistent","db"],
+      "Params": {"DataDir": "~/ds-bench", "Sync": false}
+    },
+    {
+      "Type": "leveldb",
+      "Name": "leveldb-ntfs",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh ntfs /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "leveldb",
+      "Name": "leveldb-ext4",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh ext4 /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "leveldb",
+      "Name": "leveldb-xfs",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh xfs /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "leveldb",
+      "Name": "leveldb-btrfs",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh btrfs /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    }
+  ]
+}

@@ -3,6 +3,7 @@ package master
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"io"
 	"io/ioutil"
 	"log"
@@ -61,7 +62,7 @@ type Worker struct {
 }
 
 func LoadWorkers() ([]*Worker, error) {
-	f, err := os.Open("test-spec.json")
+	f, err := os.Open(flag.Arg(0))
 	if err != nil {
 		return nil, err
 	}
@@ -92,6 +93,16 @@ func (w *Worker) runSingle(spec options.TestSpec) (*parse.Benchmark, error) {
 	}
 	if err := ioutil.WriteFile(filepath.Join(wd, "spec.json"), specJson, 0644); err != nil {
 		return nil, err
+	}
+
+	if spec.Datastore.Scripts.Pre != "" {
+		log.Printf("running pre-run script for datastore %s: %s", spec.Datastore.Name, spec.Datastore.Scripts.Pre)
+		c := exec.Command("/usr/bin/env", "bash", "-c", spec.Datastore.Scripts.Pre)
+		c.Stderr = os.Stderr
+		c.Stdout = os.Stdout
+		if err := c.Run(); err != nil {
+			return nil, err
+		}
 	}
 
 	args := []string{"-test.benchtime=100ms", "-test.benchmem", "-test.bench", "BenchmarkSpec"}
@@ -126,6 +137,16 @@ func (w *Worker) runSingle(spec options.TestSpec) (*parse.Benchmark, error) {
 
 	w.log("wait")
 	wg.Wait()
+
+	if spec.Datastore.Scripts.Post != "" {
+		log.Printf("running post-run script for datastore %s: %s", spec.Datastore.Name, spec.Datastore.Scripts.Post)
+		c := exec.Command("/usr/bin/env", "bash", "-c", spec.Datastore.Scripts.Post)
+		c.Stderr = os.Stderr
+		c.Stdout = os.Stdout
+		if err := c.Run(); err != nil {
+			panic(err)
+		}
+	}
 
 	if len(bset) != 1 {
 		return nil, errors.New("unexpected bench count")

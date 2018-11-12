@@ -2,16 +2,15 @@ package worker
 
 import (
 	"fmt"
+	ds "github.com/ipfs/go-datastore"
+	badgerds "github.com/ipfs/go-ds-badger"
 	"github.com/ipfs/go-ds-bench/options"
+	"github.com/ipfs/go-ds-flatfs"
 	"github.com/ipfs/go-ds-leveldb"
+	levelopt "github.com/syndtr/goleveldb/leveldb/opt"
 	"gx/ipfs/QmdcULN1WCzgoQmcCaUAmEhwcxHYsDrbZ2LvRJKCL8dMrK/go-homedir"
 	"io/ioutil"
 	"os"
-
-	ds "github.com/ipfs/go-datastore"
-	badgerds "github.com/ipfs/go-ds-badger"
-	flatfs "github.com/ipfs/go-ds-flatfs"
-	levelopt "github.com/syndtr/goleveldb/leveldb/opt"
 )
 
 func nopCloser(_ ds.Batching) {}
@@ -68,10 +67,7 @@ var CandidateFlatfs = func(spec options.WorkerDatastore) CandidateDatastore {
 				return
 			}
 
-			err = os.RemoveAll(d)
-			if err != nil {
-				panic(err)
-			}
+			os.RemoveAll(d)
 		},
 	}
 }
@@ -112,10 +108,7 @@ var CandidateBadger = func(spec options.WorkerDatastore) CandidateDatastore {
 				return
 			}
 
-			err = os.RemoveAll(d)
-			if err != nil {
-				panic(err)
-			}
+			os.RemoveAll(d)
 		},
 	}
 }
@@ -158,10 +151,7 @@ var CandidateLeveldb = func(spec options.WorkerDatastore) CandidateDatastore {
 				return
 			}
 
-			err = os.RemoveAll(d)
-			if err != nil {
-				panic(err)
-			}
+			os.RemoveAll(d)
 		},
 	}
 }

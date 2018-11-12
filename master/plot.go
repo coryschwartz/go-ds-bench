@@ -88,7 +88,7 @@ func (s *Series) plot(x *xsel, y *ysel, yscale plot.Normalizer, ymarker plot.Tic
 
 	plotName := fmt.Sprintf("plot-%s-%s-%s%s.png", s.PlotName, x.name, y.name, suffix)
 	plotName = strings.Replace(plotName, "/", "", -1)
-	return p.Save(8*vg.Inch, 4*vg.Inch, plotName)
+	return p.Save(8*vg.Inch, 6*vg.Inch, plotName)
 }
 
 type Log2Ticks struct{}

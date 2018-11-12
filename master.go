@@ -16,9 +16,8 @@ func assert(err error) {
 func main() {
 	flag.Parse()
 
-	if flag.NArg() == 0 {
-		fmt.Println("Usage: master [series]")
-		fmt.Println("               series [Test] [option] [from] [to]")
+	if flag.NArg() != 1 {
+		fmt.Println("Usage: master [specfile]")
 		return
 	}
 

@@ -7,6 +7,11 @@ type WorkerDatastore struct {
 	Name string
 	Tags []string
 
+	Scripts struct{
+		Pre string
+		Post string
+	}
+
 	Params map[string]interface{} //ds specific
 }
 
@@ -29,7 +34,9 @@ func (opt BenchOptions) TestDesc() string {
 
 var DefaultBenchOpts = OptionsRange2pow(
 	BenchOptions{1, 25 << 10, 64},
-	BenchOptions{1 << 17, 25 << 10, 64}, 7)
+	BenchOptions{1 << 10, 25 << 10, 64}, 7)
+
+// prc 17 is ~2g
 
 func OptionsRange2pow(start, end BenchOptions, countPerAxis int) []BenchOptions {
 	res := []BenchOptions{start}
