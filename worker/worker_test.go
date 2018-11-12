@@ -21,6 +21,12 @@ func BenchmarkSpec(b *testing.B) {
 	switch spec.Test {
 	case "get":
 		BenchGetSeries(b, CandidateDs(spec.Datastore), []options.BenchOptions{spec.Options})
+	case "has":
+		BenchHasSeries(b, CandidateDs(spec.Datastore), []options.BenchOptions{spec.Options})
+	case "add":
+		BenchAddSeries(b, CandidateDs(spec.Datastore), []options.BenchOptions{spec.Options})
+	case "add-batch":
+		BenchAddBatchSeries(b, CandidateDs(spec.Datastore), []options.BenchOptions{spec.Options})
 	default:
 		b.Fatalf("unknown test '%s'", spec.Test)
 	}
