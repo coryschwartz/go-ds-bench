@@ -51,7 +51,7 @@ var xselPrimeRecs = &xsel{
 	},
 }
 
-func (s *Series) plot(x *xsel, y *ysel, xscale, yscale plot.Normalizer) error {
+func (s *Series) plot(x *xsel, y *ysel, xscale, yscale plot.Normalizer, suffix string) error {
 	p, err := plot.New()
 	if err != nil {
 		return err
@@ -78,8 +78,7 @@ func (s *Series) plot(x *xsel, y *ysel, xscale, yscale plot.Normalizer) error {
 		return err
 	}
 
-	plotName := fmt.Sprintf("plot-%s-%s-%s.png", s.PlotName, x.name, y.name)
+	plotName := fmt.Sprintf("plot-%s-%s-%s%s.png", s.PlotName, x.name, y.name, suffix)
 	plotName = strings.Replace(plotName, "/", "", -1)
 	return p.Save(4*vg.Inch, 4*vg.Inch, plotName)
 }
-

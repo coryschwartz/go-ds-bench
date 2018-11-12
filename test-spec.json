@@ -9,37 +9,37 @@
       "Type": "flatfs",
       "Name": "flatfs",
       "Tags": ["persistent", "safe"],
-      "Params":{"DataDir": "/tmp/ds-bench", "Sync": true}
+      "Params":{"DataDir": "~/ds-bench", "Sync": true}
     },
     {
       "Type": "flatfs",
       "Name": "flatfs-nosync",
       "Tags": ["persistent"],
-      "Params":{"DataDir": "/tmp/ds-bench", "Sync": false}
+      "Params":{"DataDir": "~/ds-bench", "Sync": false}
     },
     {
       "Type": "badger",
       "Name": "badger",
       "Tags": ["persistent","db","safe"],
-      "Params":{"DataDir": "/tmp/ds-bench", "Sync": true}
+      "Params":{"DataDir": "~/ds-bench", "Sync": true}
     },
     {
       "Type": "badger",
       "Name": "badger-nosync",
       "Tags": ["persistent","db"],
-      "Params":{"DataDir": "/tmp/ds-bench", "Sync": false}
+      "Params":{"DataDir": "~/ds-bench", "Sync": false}
     },
     {
       "Type": "leveldb",
       "Name": "leveldb",
       "Tags": ["persistent","db","safe"],
-      "Params":{"DataDir": "/tmp/ds-bench", "Sync": true}
+      "Params":{"DataDir": "~/ds-bench", "Sync": true}
     },
     {
       "Type": "leveldb",
       "Name": "leveldb-nosync",
       "Tags": ["persistent","db"],
-      "Params":{"DataDir": "/tmp/ds-bench", "Sync": false}
+      "Params":{"DataDir": "~/ds-bench", "Sync": false}
     }
   ]
 }

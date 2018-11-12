@@ -21,13 +21,13 @@ type Series struct {
 	Results map[string][]*parse.Benchmark
 }
 
-func (s *Series) benchSeries() error {
+func (s *Series) benchSeries(f ...DsFilter) error {
 	if _, err := os.Stat("results-" + s.PlotName + ".json"); !os.IsNotExist(err) {
 		return errors.New("results for this bench already exist")
 	}
 
 	for _, w := range s.Workers {
-		for _, ds := range w.Spec.Datastores {
+		for _, ds := range applyFilters(f, w.Spec.Datastores) {
 			for _, opt := range s.Opts {
 				r, err := w.runSingle(options.TestSpec{
 					Datastore: ds,

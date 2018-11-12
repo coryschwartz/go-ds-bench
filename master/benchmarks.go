@@ -7,19 +7,23 @@ import (
 )
 
 func defaultBench(s *Series) error {
-	if err := s.benchSeries(); err != nil {
+	if err := s.benchSeries(NoTag("memory")); err != nil {
 		return err
 	}
 
-	if err := s.plot(xselPrimeRecs, yselNsPerOp, plot.LogScale{}, plot.LinearScale{}); err != nil {
+	if err := s.plot(xselPrimeRecs, yselNsPerOp, plot.LogScale{}, plot.LinearScale{}, ""); err != nil {
 		return err
 	}
 
-	if err := s.plot(xselPrimeRecs, yselAllocs, plot.LogScale{}, plot.LinearScale{}); err != nil {
+	if err := s.plot(xselPrimeRecs, yselNsPerOp, plot.LogScale{}, plot.LogScale{}, "-log"); err != nil {
 		return err
 	}
 
-	if err := s.plot(xselPrimeRecs, yselMBps, plot.LogScale{}, plot.LinearScale{}); err != nil {
+	if err := s.plot(xselPrimeRecs, yselAllocs, plot.LogScale{}, plot.LinearScale{}, ""); err != nil {
+		return err
+	}
+
+	if err := s.plot(xselPrimeRecs, yselMBps, plot.LogScale{}, plot.LinearScale{}, ""); err != nil {
 		return err
 	}
 
@@ -41,8 +45,8 @@ func BenchBasicGet(w []*Worker) error {
 
 func BenchBasicHas(w []*Worker) error {
 	testSeries := &Series{
-		Test:     "get",
-		PlotName: "get-all-default",
+		Test:     "has",
+		PlotName: "has-all-default",
 		Opts:     options.DefaultBenchOpts,
 
 		Workers: w,
@@ -54,8 +58,8 @@ func BenchBasicHas(w []*Worker) error {
 
 func BenchBasicAdd(w []*Worker) error {
 	testSeries := &Series{
-		Test:     "get",
-		PlotName: "get-all-default",
+		Test:     "add",
+		PlotName: "add-all-default",
 		Opts:     options.DefaultBenchOpts,
 
 		Workers: w,
@@ -67,8 +71,8 @@ func BenchBasicAdd(w []*Worker) error {
 
 func BenchBasicAddBatch(w []*Worker) error {
 	testSeries := &Series{
-		Test:     "get",
-		PlotName: "get-all-default",
+		Test:     "add-batch",
+		PlotName: "add-batch-all-default",
 		Opts:     options.DefaultBenchOpts,
 
 		Workers: w,

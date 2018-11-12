@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	"github.com/ipfs/go-ds-bench/master"
 )
 

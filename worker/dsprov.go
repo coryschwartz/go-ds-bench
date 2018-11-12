@@ -8,10 +8,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	levelopt "github.com/syndtr/goleveldb/leveldb/opt"
 	ds "github.com/ipfs/go-datastore"
 	badgerds "github.com/ipfs/go-ds-badger"
 	flatfs "github.com/ipfs/go-ds-flatfs"
+	levelopt "github.com/syndtr/goleveldb/leveldb/opt"
 )
 
 func nopCloser(_ ds.Batching) {}
@@ -145,7 +145,7 @@ var CandidateLeveldb = func(spec options.WorkerDatastore) CandidateDatastore {
 
 			opts := leveldb.Options{
 				Compression: levelopt.DefaultCompression,
-				NoSync: !spec.Params["Sync"].(bool),
+				NoSync:      !spec.Params["Sync"].(bool),
 			}
 
 			return leveldb.NewDatastore(dir, &opts)

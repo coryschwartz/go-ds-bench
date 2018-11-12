@@ -16,6 +16,31 @@ import (
 	"golang.org/x/tools/benchmark/parse"
 )
 
+type DsFilter func([]options.WorkerDatastore) []options.WorkerDatastore
+
+func NoTag(tag string) func([]options.WorkerDatastore) []options.WorkerDatastore {
+	return func(datastores []options.WorkerDatastore) []options.WorkerDatastore {
+		out := make([]options.WorkerDatastore, 0, len(datastores))
+	next:
+		for _, d := range datastores {
+			for _, t := range d.Tags {
+				if t == tag {
+					continue next
+				}
+			}
+			out = append(out, d)
+		}
+		return out
+	}
+}
+
+func applyFilters(filters []DsFilter, opts []options.WorkerDatastore) []options.WorkerDatastore {
+	for _, f := range filters {
+		opts = f(opts)
+	}
+	return opts
+}
+
 var workerBin = "./worker.test"
 
 func init() {
@@ -116,4 +141,3 @@ func (w *Worker) runSingle(spec options.TestSpec) (*parse.Benchmark, error) {
 
 	panic("shouldn't be here")
 }
-
