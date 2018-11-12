@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/ipfs/go-ds-bench/options"
 
 	"golang.org/x/tools/benchmark/parse"
 )
+
+var ErrExists = errors.New("results for this bench already exist")
 
 type Series struct {
 	Opts     []options.BenchOptions
@@ -22,8 +25,9 @@ type Series struct {
 }
 
 func (s *Series) benchSeries(f ...DsFilter) error {
+	log.Printf("BEGIN %s", s.PlotName)
 	if _, err := os.Stat("results-" + s.PlotName + ".json"); !os.IsNotExist(err) {
-		return errors.New("results for this bench already exist")
+		return ErrExists
 	}
 
 	for _, w := range s.Workers {

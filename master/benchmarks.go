@@ -4,10 +4,15 @@ import (
 	"github.com/ipfs/go-ds-bench/options"
 	"golang.org/x/tools/benchmark/parse"
 	"gonum.org/v1/plot"
+	"log"
 )
 
 func defaultBench(s *Series) error {
 	if err := s.benchSeries(NoTag("memory")); err != nil {
+		if err == ErrExists {
+			log.Printf("SKIPPING %s", s.PlotName)
+			return nil
+		}
 		return err
 	}
 
