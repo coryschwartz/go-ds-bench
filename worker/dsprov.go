@@ -45,6 +45,11 @@ var CandidateFlatfs = func(spec options.WorkerDatastore) CandidateDatastore {
 				return nil, err
 			}
 
+			err = os.MkdirAll(d, 0775)
+			if err != nil {
+				return nil, err
+			}
+
 			dir, err := ioutil.TempDir(d, "bench")
 			if err != nil {
 				return nil, err
@@ -75,6 +80,11 @@ var CandidateBadger = func(spec options.WorkerDatastore) CandidateDatastore {
 	return CandidateDatastore{
 		Create: func() (ds.Batching, error) {
 			d, err := homedir.Expand(spec.Params["DataDir"].(string))
+			if err != nil {
+				return nil, err
+			}
+
+			err = os.MkdirAll(d, 0775)
 			if err != nil {
 				return nil, err
 			}
@@ -114,6 +124,11 @@ var CandidateLeveldb = func(spec options.WorkerDatastore) CandidateDatastore {
 	return CandidateDatastore{
 		Create: func() (ds.Batching, error) {
 			d, err := homedir.Expand(spec.Params["DataDir"].(string))
+			if err != nil {
+				return nil, err
+			}
+
+			err = os.MkdirAll(d, 0775)
 			if err != nil {
 				return nil, err
 			}

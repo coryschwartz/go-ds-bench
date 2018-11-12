@@ -1,4 +1,4 @@
-package main
+package master
 
 import (
 	"fmt"
@@ -51,7 +51,7 @@ var xselPrimeRecs = &xsel{
 	},
 }
 
-func (s *series) plot(x *xsel, y *ysel, xscale, yscale plot.Normalizer) error {
+func (s *Series) plot(x *xsel, y *ysel, xscale, yscale plot.Normalizer) error {
 	p, err := plot.New()
 	if err != nil {
 		return err

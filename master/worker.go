@@ -1,4 +1,4 @@
-package main
+package master
 
 import (
 	"encoding/json"
@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/ipfs/go-ds-bench/options"
@@ -30,11 +31,11 @@ type workerSpec struct {
 	Datastores []options.WorkerDatastore
 }
 
-type worker struct {
+type Worker struct {
 	Spec workerSpec
 }
 
-func loadWorkers() ([]*worker, error) {
+func LoadWorkers() ([]*Worker, error) {
 	f, err := os.Open("test-spec.json")
 	if err != nil {
 		return nil, err
@@ -46,14 +47,14 @@ func loadWorkers() ([]*worker, error) {
 		return nil, err
 	}
 
-	return []*worker{{Spec: spec}}, nil
+	return []*Worker{{Spec: spec}}, nil
 }
 
-func (w *worker) log(f string, v ...interface{}) {
-	log.Printf("[worker] "+f, v...)
+func (w *Worker) log(f string, v ...interface{}) {
+	log.Printf("[Worker] "+f, v...)
 }
 
-func (w *worker) runSingle(spec options.TestSpec) (*parse.Benchmark, error) {
+func (w *Worker) runSingle(spec options.TestSpec) (*parse.Benchmark, error) {
 	wd, err := ioutil.TempDir("/tmp", "dsbench-")
 	if err != nil {
 		return nil, err
@@ -68,7 +69,8 @@ func (w *worker) runSingle(spec options.TestSpec) (*parse.Benchmark, error) {
 		return nil, err
 	}
 
-	cmd := exec.Command(workerBin, "-test.benchtime=100ms", "-test.benchmem", "-test.bench", "BenchmarkSpec")
+	args := []string{"-test.benchtime=100ms", "-test.benchmem", "-test.bench", "BenchmarkSpec"}
+	cmd := exec.Command(workerBin, args...)
 	cmd.Dir = wd
 	cmd.Stderr = os.Stderr
 	var sout io.Reader
@@ -78,7 +80,8 @@ func (w *worker) runSingle(spec options.TestSpec) (*parse.Benchmark, error) {
 	}
 	sout = io.TeeReader(sout, os.Stderr)
 
-	w.log("start")
+	w.log("wd=%s", wd)
+	w.log("start %s [cd %s; %s %s]", spec.Datastore.Name, wd, workerBin, strings.Join(args, " "))
 
 	var wg sync.WaitGroup
 	wg.Add(1)
