@@ -48,7 +48,7 @@ func OptionsRange2pow(start, end BenchOptions, countPerAxis int) []BenchOptions 
 	axis := make([]float64, countPerAxis)
 	maxN := 1 << uint(countPerAxis)
 	for i := 0; i < countPerAxis-1; i++ {
-		axis[i] = float64(uint(1)<<uint(i)) / float64(maxN)
+		axis[i] = float64(uint(1)<<uint(i+1)) / float64(maxN)
 	}
 	axis[countPerAxis-1] = 1
 
