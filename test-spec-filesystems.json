@@ -15,7 +15,7 @@
       "Type": "flatfs",
       "Name": "flatfs-ntfs",
       "Scripts": {
-        "Pre": "scripts/fs_prerun.sh ntfs /dev/nvme0n1p3 /ds-bench",
+        "Pre": "scripts/fs_prerun.sh 'ntfs -f' /dev/nvme0n1p3 /ds-bench",
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
       "Tags": ["persistent", "safe", "sudo"],
@@ -61,7 +61,7 @@
       "Type": "badger",
       "Name": "badger-ntfs",
       "Scripts": {
-        "Pre": "scripts/fs_prerun.sh ntfs /dev/nvme0n1p3 /ds-bench",
+        "Pre": "scripts/fs_prerun.sh 'ntfs -f' /dev/nvme0n1p3 /ds-bench",
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
       "Tags": ["persistent", "safe", "sudo"],
@@ -107,7 +107,7 @@
       "Type": "leveldb",
       "Name": "leveldb-ntfs",
       "Scripts": {
-        "Pre": "scripts/fs_prerun.sh ntfs /dev/nvme0n1p3 /ds-bench",
+        "Pre": "scripts/fs_prerun.sh 'ntfs -f' /dev/nvme0n1p3 /ds-bench",
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
       "Tags": ["persistent", "safe", "sudo"],

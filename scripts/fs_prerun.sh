@@ -8,5 +8,5 @@ set -x
 sudo -n blkdiscard $2
 sudo -n mkfs -t $1 $2
 sudo -n mkdir -p $3
-sudo -n mount -t $1 $2 $3
+sudo -n mount $2 $3
 sudo -n chown -R $(id -u) $3
