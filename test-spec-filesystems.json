@@ -202,6 +202,72 @@
       },
       "Tags": ["persistent", "safe", "sudo", "nilfs2"],
       "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "bolt",
+      "Name": "bolt-nosync",
+      "Tags": ["persistent","db"],
+      "Params": {"DataDir": "~/ds-bench", "Sync": false}
+    },
+    {
+      "Type": "bolt",
+      "Name": "bolt-ntfs",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh 'ntfs -f' /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo", "ntfs"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "bolt",
+      "Name": "bolt-ext4",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh ext4 /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo", "ext4"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "bolt",
+      "Name": "bolt-xfs",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh xfs /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo", "xfs"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "bolt",
+      "Name": "bolt-btrfs",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh btrfs /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo", "btrfs"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "bolt",
+      "Name": "bolt-jfs",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh jfs /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo", "jfs"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
+    },
+    {
+      "Type": "bolt",
+      "Name": "bolt-nilfs2",
+      "Scripts": {
+        "Pre": "scripts/fs_prerun.sh nilfs2 /dev/nvme0n1p3 /ds-bench",
+        "Post": "scripts/fs_postrun.sh /ds-bench"
+      },
+      "Tags": ["persistent", "safe", "sudo", "nilfs2"],
+      "Params": {"DataDir": "/ds-bench", "Sync": true}
     }
   ]
 }

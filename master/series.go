@@ -38,7 +38,6 @@ func (s *Series) benchSeries(f ...DsFilter) error {
 	}
 
 	for {
-		log.Println("single")
 		err := s.doSingle(f...)
 		if err != nil {
 			if err != errDone {
@@ -56,7 +55,6 @@ func (s *Series) doSingle(f ...DsFilter) error {
 		for _, ds := range applyFilters(f, w.Spec.Datastores) {
 			for n, opt := range s.Opts {
 				if len(s.Results[ds.Name]) > n {
-					log.Printf("SKIPPING %s-%s-%d\n", s.PlotName, ds.Name, n)
 					continue
 				}
 				log.Printf("START %s-%s-%d\n", s.PlotName, ds.Name, n)
