@@ -25,7 +25,7 @@ func defaultBench(s *Series) error {
 func BenchBasicGet(w []*Worker) error {
 	testSeries := &Series{
 		Test:     "get",
-		PlotName: "get-all-default",
+		PlotName: "get",
 		Opts:     options.DefaultBenchOpts,
 
 		Workers: w,
@@ -38,7 +38,7 @@ func BenchBasicGet(w []*Worker) error {
 func BenchBasicHas(w []*Worker) error {
 	testSeries := &Series{
 		Test:     "has",
-		PlotName: "has-all-default",
+		PlotName: "has",
 		Opts:     options.DefaultBenchOpts,
 
 		Workers: w,
@@ -51,7 +51,7 @@ func BenchBasicHas(w []*Worker) error {
 func BenchBasicAdd(w []*Worker) error {
 	testSeries := &Series{
 		Test:     "add",
-		PlotName: "add-all-default",
+		PlotName: "add",
 		Opts:     options.DefaultBenchOpts,
 
 		Workers: w,
@@ -64,7 +64,7 @@ func BenchBasicAdd(w []*Worker) error {
 func BenchBasicAddBatch(w []*Worker) error {
 	testSeries := &Series{
 		Test:     "add-batch",
-		PlotName: "add-batch-all-default",
+		PlotName: "add-batch",
 		Opts:     options.DefaultBenchOpts,
 
 		Workers: w,

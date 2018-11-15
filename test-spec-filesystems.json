@@ -1,11 +1,6 @@
 {
   "Datastores": [
     {
-      "Type": "memory-map",
-      "Name": "mem",
-      "Tags": ["memory"]
-    },
-    {
       "Type": "flatfs",
       "Name": "flatfs-nosync",
       "Tags": ["persistent"],
