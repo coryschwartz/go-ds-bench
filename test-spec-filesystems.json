@@ -62,16 +62,6 @@
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     },
     {
-      "Type": "flatfs",
-      "Name": "flatfs-nilfs2",
-      "Scripts": {
-        "Pre": "scripts/fs_prerun.sh nilfs2 /dev/nvme0n1p3 /ds-bench",
-        "Post": "scripts/fs_postrun.sh /ds-bench"
-      },
-      "Tags": ["persistent", "safe", "sudo", "nilfs2"],
-      "Params": {"DataDir": "/ds-bench", "Sync": true}
-    },
-    {
       "Type": "badger",
       "Name": "badger-nosync",
       "Tags": ["persistent","db"],
@@ -125,16 +115,6 @@
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
       "Tags": ["persistent", "safe", "sudo", "jfs"],
-      "Params": {"DataDir": "/ds-bench", "Sync": true}
-    },
-    {
-      "Type": "badger",
-      "Name": "badger-nilfs2",
-      "Scripts": {
-        "Pre": "scripts/fs_prerun.sh nilfs2 /dev/nvme0n1p3 /ds-bench",
-        "Post": "scripts/fs_postrun.sh /ds-bench"
-      },
-      "Tags": ["persistent", "safe", "sudo", "nilfs2"],
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     },
     {
@@ -194,16 +174,6 @@
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     },
     {
-      "Type": "leveldb",
-      "Name": "leveldb-nilfs2",
-      "Scripts": {
-        "Pre": "scripts/fs_prerun.sh nilfs2 /dev/nvme0n1p3 /ds-bench",
-        "Post": "scripts/fs_postrun.sh /ds-bench"
-      },
-      "Tags": ["persistent", "safe", "sudo", "nilfs2"],
-      "Params": {"DataDir": "/ds-bench", "Sync": true}
-    },
-    {
       "Type": "bolt",
       "Name": "bolt-nosync",
       "Tags": ["persistent","db"],
@@ -257,16 +227,6 @@
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
       "Tags": ["persistent", "safe", "sudo", "jfs"],
-      "Params": {"DataDir": "/ds-bench", "Sync": true}
-    },
-    {
-      "Type": "bolt",
-      "Name": "bolt-nilfs2",
-      "Scripts": {
-        "Pre": "scripts/fs_prerun.sh nilfs2 /dev/nvme0n1p3 /ds-bench",
-        "Post": "scripts/fs_postrun.sh /ds-bench"
-      },
-      "Tags": ["persistent", "safe", "sudo", "nilfs2"],
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     }
   ]
