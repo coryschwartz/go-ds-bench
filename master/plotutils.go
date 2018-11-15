@@ -42,6 +42,13 @@ var yselAllocs = &ysel{
 	},
 }
 
+var yselAlocKB = &ysel{
+	name: "allocKBs/op",
+	sel: func(b *parse.Benchmark) float64 {
+		return float64(b.AllocedBytesPerOp)/ 1024.0
+	},
+}
+
 var xselPrimeRecs = &xsel{
 	name: "prime-count",
 	sel: func(opt options.BenchOptions) float64 {

@@ -190,6 +190,14 @@ func (s *Series) benchPlots(path string, results map[string][]*parse.Benchmark) 
 		return err
 	}
 
+	if err := s.plot(path, results, xselPrimeRecs, yselAlocKB, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
+		return err
+	}
+
+	if err := s.plot(path, results, xselPrimeRecs, yselAlocKB, ZeroLogScale{}, Log2Ticks{}, "-log"); err != nil {
+		return err
+	}
+
 	if err := s.plot(path, results, xselPrimeRecs, yselMBps, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
 		return err
 	}
