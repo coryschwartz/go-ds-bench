@@ -18,7 +18,7 @@
         "Pre": "scripts/fs_prerun.sh 'ntfs -f' /dev/nvme0n1p3 /ds-bench",
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
-      "Tags": ["persistent", "safe", "sudo"],
+      "Tags": ["persistent", "safe", "sudo", "ntfs"],
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     },
     {
@@ -28,7 +28,7 @@
         "Pre": "scripts/fs_prerun.sh ext4 /dev/nvme0n1p3 /ds-bench",
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
-      "Tags": ["persistent", "safe", "sudo"],
+      "Tags": ["persistent", "safe", "sudo", "ext4"],
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     },
     {
@@ -38,7 +38,7 @@
         "Pre": "scripts/fs_prerun.sh xfs /dev/nvme0n1p3 /ds-bench",
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
-      "Tags": ["persistent", "safe", "sudo"],
+      "Tags": ["persistent", "safe", "sudo", "xfs"],
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     },
     {
@@ -48,7 +48,7 @@
         "Pre": "scripts/fs_prerun.sh btrfs /dev/nvme0n1p3 /ds-bench",
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
-      "Tags": ["persistent", "safe", "sudo"],
+      "Tags": ["persistent", "safe", "sudo", "btrfs"],
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     },
     {
@@ -64,7 +64,7 @@
         "Pre": "scripts/fs_prerun.sh 'ntfs -f' /dev/nvme0n1p3 /ds-bench",
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
-      "Tags": ["persistent", "safe", "sudo"],
+      "Tags": ["persistent", "safe", "sudo", "ntfs"],
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     },
     {
@@ -74,7 +74,7 @@
         "Pre": "scripts/fs_prerun.sh ext4 /dev/nvme0n1p3 /ds-bench",
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
-      "Tags": ["persistent", "safe", "sudo"],
+      "Tags": ["persistent", "safe", "sudo", "ext4"],
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     },
     {
@@ -84,7 +84,7 @@
         "Pre": "scripts/fs_prerun.sh xfs /dev/nvme0n1p3 /ds-bench",
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
-      "Tags": ["persistent", "safe", "sudo"],
+      "Tags": ["persistent", "safe", "sudo", "xfs"],
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     },
     {
@@ -94,7 +94,7 @@
         "Pre": "scripts/fs_prerun.sh btrfs /dev/nvme0n1p3 /ds-bench",
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
-      "Tags": ["persistent", "safe", "sudo"],
+      "Tags": ["persistent", "safe", "sudo", "btrfs"],
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     },
     {
@@ -110,7 +110,7 @@
         "Pre": "scripts/fs_prerun.sh 'ntfs -f' /dev/nvme0n1p3 /ds-bench",
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
-      "Tags": ["persistent", "safe", "sudo"],
+      "Tags": ["persistent", "safe", "sudo", "ntfs"],
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     },
     {
@@ -120,7 +120,7 @@
         "Pre": "scripts/fs_prerun.sh ext4 /dev/nvme0n1p3 /ds-bench",
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
-      "Tags": ["persistent", "safe", "sudo"],
+      "Tags": ["persistent", "safe", "sudo", "ext4"],
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     },
     {
@@ -130,7 +130,7 @@
         "Pre": "scripts/fs_prerun.sh xfs /dev/nvme0n1p3 /ds-bench",
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
-      "Tags": ["persistent", "safe", "sudo"],
+      "Tags": ["persistent", "safe", "sudo", "xfs"],
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     },
     {
@@ -140,7 +140,7 @@
         "Pre": "scripts/fs_prerun.sh btrfs /dev/nvme0n1p3 /ds-bench",
         "Post": "scripts/fs_postrun.sh /ds-bench"
       },
-      "Tags": ["persistent", "safe", "sudo"],
+      "Tags": ["persistent", "safe", "sudo", "btrfs"],
       "Params": {"DataDir": "/ds-bench", "Sync": true}
     }
   ]

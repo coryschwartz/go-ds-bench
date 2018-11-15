@@ -63,7 +63,7 @@ func (s *Series) plot(x *xsel, y *ysel, yscale plot.Normalizer, ymarker plot.Tic
 	p.Title.Text = s.PlotName
 	p.Y.Label.Text = y.name
 	p.X.Label.Text = x.name
-	p.X.Scale = plot.LogScale{}
+	p.X.Scale = ZeroLogScale{}
 	p.Y.Scale = yscale
 	p.Legend.Top = true
 	p.X.Tick.Marker = Log2Ticks{}
@@ -102,6 +102,9 @@ func (t Log2Ticks) Ticks(min, max float64) []plot.Tick {
 	}
 
 	val := math.Pow(2, math.Log2(min))
+	if val == 0 {
+		val = 1
+	}
 	max = math.Pow(2, math.Ceil(math.Log2(max)))
 	var ticks []plot.Tick
 	for val < max {

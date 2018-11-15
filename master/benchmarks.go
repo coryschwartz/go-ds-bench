@@ -1,10 +1,10 @@
 package master
 
 import (
+	"log"
+
 	"github.com/ipfs/go-ds-bench/options"
 	"golang.org/x/tools/benchmark/parse"
-	"gonum.org/v1/plot"
-	"log"
 )
 
 func defaultBench(s *Series) error {
@@ -19,31 +19,7 @@ func defaultBench(s *Series) error {
 		}
 	}
 
-	if err := s.plot(xselPrimeRecs, yselNsPerOp, plot.LinearScale{}, TimeTicks{plot.DefaultTicks{}}, ""); err != nil {
-		return err
-	}
-
-	if err := s.plot(xselPrimeRecs, yselNsPerOp, plot.LogScale{}, TimeTicks{Log2Ticks{}}, "-log"); err != nil {
-		return err
-	}
-
-	if err := s.plot(xselPrimeRecs, yselAllocs, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
-		return err
-	}
-
-	if err := s.plot(xselPrimeRecs, yselAllocs, plot.LogScale{}, Log2Ticks{}, "-log"); err != nil {
-		return err
-	}
-
-	if err := s.plot(xselPrimeRecs, yselMBps, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
-		return err
-	}
-
-	if err := s.plot(xselPrimeRecs, yselMBps, ZeroLogScale{}, Log2Ticks{}, "-log"); err != nil {
-		return err
-	}
-
-	return nil
+	return s.standardPlots()
 }
 
 func BenchBasicGet(w []*Worker) error {

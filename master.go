@@ -14,6 +14,7 @@ func assert(err error) {
 }
 
 func main() {
+	master.Cont = flag.Bool("continue", false, "Continue previous work")
 	flag.Parse()
 
 	if flag.NArg() != 1 {
@@ -30,8 +31,8 @@ func main() {
 }
 
 func run(w []*master.Worker) {
-	assert(master.BenchBasicGet(w))
-	assert(master.BenchBasicHas(w))
-	assert(master.BenchBasicAdd(w))
+	//assert(master.BenchBasicGet(w))
+	//assert(master.BenchBasicHas(w))
+	//assert(master.BenchBasicAdd(w))
 	assert(master.BenchBasicAddBatch(w))
 }

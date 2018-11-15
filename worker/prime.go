@@ -15,7 +15,7 @@ func PrimeDS(tb testing.TB, store ds.Batching, count, blockSize int) {
 	if maxBatchCount > 2048 {
 		maxBatchCount = 2048
 	}
-	parallelism := 128
+	parallelism := 256
 	if _, ok := store.(ds.ThreadSafeDatastore); !ok {
 		parallelism = 1
 	}

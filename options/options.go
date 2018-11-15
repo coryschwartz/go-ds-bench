@@ -34,9 +34,9 @@ func (opt BenchOptions) TestDesc() string {
 
 var DefaultBenchOpts = OptionsRange2pow(
 	BenchOptions{1, 25 << 10, 64},
-	BenchOptions{1 << 10, 25 << 10, 64}, 7)
+	BenchOptions{1 << 5, 25 << 10, 64}, 2)
 
-// prc 17 is ~2g
+  // 20 / 25 / 13 is 1M / ~20G
 
 func OptionsRange2pow(start, end BenchOptions, countPerAxis int) []BenchOptions {
 	res := []BenchOptions{start}

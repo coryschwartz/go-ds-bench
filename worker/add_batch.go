@@ -9,7 +9,7 @@ import (
 )
 
 func BenchAddBatchAt(b *testing.B, store ds.Batching, opt options.BenchOptions, keys []ds.Key, bufs [][]byte) {
-	//PrimeDS(b, store, opt.PrimeRecordCount, opt.RecordSize)
+	PrimeDS(b, store, opt.PrimeRecordCount, opt.RecordSize)
 	b.SetBytes(int64(opt.RecordSize))
 	b.ResetTimer() // reset timer, this is start of real test
 
