@@ -9,15 +9,16 @@ import (
 	"github.com/ipfs/go-ds-leveldb"
 	levelopt "github.com/syndtr/goleveldb/leveldb/opt"
 	"gx/ipfs/QmdcULN1WCzgoQmcCaUAmEhwcxHYsDrbZ2LvRJKCL8dMrK/go-homedir"
+	"io"
 	"io/ioutil"
 	"os"
 )
 
-func nopCloser(_ ds.Batching) {}
+func nopCloser() {}
 
 type CandidateDatastore struct {
-	Create  func() (ds.Batching, error)
-	Destroy func(ds.Batching)
+	Create  func() (func(fast bool) (ds.Batching, io.Closer, error), error)
+	Destroy func()
 }
 
 var datastores = map[string]func(options.WorkerDatastore) CandidateDatastore{
@@ -29,8 +30,12 @@ var datastores = map[string]func(options.WorkerDatastore) CandidateDatastore{
 
 var CandidateMemoryMap = func(options.WorkerDatastore) CandidateDatastore {
 	return CandidateDatastore{
-		Create: func() (ds.Batching, error) {
-			return ds.NewMapDatastore(), nil
+		Create: func() (func(bool) (ds.Batching, io.Closer, error), error) {
+			mds := ds.NewMapDatastore()
+
+			return func(fast bool) (ds.Batching, io.Closer, error) {
+				return mds, mds, nil
+			}, nil
 		},
 		Destroy: nopCloser,
 	}
@@ -38,7 +43,7 @@ var CandidateMemoryMap = func(options.WorkerDatastore) CandidateDatastore {
 
 var CandidateFlatfs = func(spec options.WorkerDatastore) CandidateDatastore {
 	return CandidateDatastore{
-		Create: func() (ds.Batching, error) {
+		Create: func() (func(bool) (ds.Batching, io.Closer, error), error) {
 			d, err := homedir.Expand(spec.Params["DataDir"].(string))
 			if err != nil {
 				return nil, err
@@ -59,9 +64,12 @@ var CandidateFlatfs = func(spec options.WorkerDatastore) CandidateDatastore {
 				return nil, err
 			}
 
-			return flatfs.CreateOrOpen(dir, flatfs.NextToLast(2), spec.Params["Sync"].(bool))
+			return func(fast bool) (ds.Batching, io.Closer, error) {
+				fs, err := flatfs.CreateOrOpen(dir, flatfs.NextToLast(2), !fast && spec.Params["Sync"].(bool))
+				return fs, fs, err
+			}, nil
 		},
-		Destroy: func(ds ds.Batching) {
+		Destroy: func() {
 			d, err := homedir.Expand(spec.Params["DataDir"].(string))
 			if err != nil {
 				return
@@ -74,7 +82,7 @@ var CandidateFlatfs = func(spec options.WorkerDatastore) CandidateDatastore {
 
 var CandidateBadger = func(spec options.WorkerDatastore) CandidateDatastore {
 	return CandidateDatastore{
-		Create: func() (ds.Batching, error) {
+		Create: func() (func(bool) (ds.Batching, io.Closer, error), error) {
 			d, err := homedir.Expand(spec.Params["DataDir"].(string))
 			if err != nil {
 				return nil, err
@@ -95,14 +103,15 @@ var CandidateBadger = func(spec options.WorkerDatastore) CandidateDatastore {
 				return nil, err
 			}
 
-			opts := badgerds.DefaultOptions
-			opts.SyncWrites = spec.Params["Sync"].(bool)
+			return func(fast bool) (ds.Batching, io.Closer, error) {
+				opts := badgerds.DefaultOptions
+				opts.SyncWrites = !fast && spec.Params["Sync"].(bool)
+				d, err := badgerds.NewDatastore(dir, &opts)
 
-			return badgerds.NewDatastore(dir, &opts)
+				return d, d, err
+			}, nil
 		},
-		Destroy: func(ds ds.Batching) {
-			ds.(*badgerds.Datastore).Close()
-
+		Destroy: func() {
 			d, err := homedir.Expand(spec.Params["DataDir"].(string))
 			if err != nil {
 				return
@@ -115,7 +124,7 @@ var CandidateBadger = func(spec options.WorkerDatastore) CandidateDatastore {
 
 var CandidateLeveldb = func(spec options.WorkerDatastore) CandidateDatastore {
 	return CandidateDatastore{
-		Create: func() (ds.Batching, error) {
+		Create: func() (func(bool) (ds.Batching, io.Closer, error), error) {
 			d, err := homedir.Expand(spec.Params["DataDir"].(string))
 			if err != nil {
 				return nil, err
@@ -136,16 +145,17 @@ var CandidateLeveldb = func(spec options.WorkerDatastore) CandidateDatastore {
 				return nil, err
 			}
 
-			opts := leveldb.Options{
-				Compression: levelopt.DefaultCompression,
-				NoSync:      !spec.Params["Sync"].(bool),
-			}
+			return func(fast bool) (ds.Batching, io.Closer, error) {
+				opts := leveldb.Options{
+					Compression: levelopt.DefaultCompression,
+					NoSync:      !fast && !spec.Params["Sync"].(bool),
+				}
 
-			return leveldb.NewDatastore(dir, &opts)
+				ldb, err := leveldb.NewDatastore(dir, &opts)
+				return ldb, ldb, err
+			}, nil
 		},
-		Destroy: func(ds ds.Batching) {
-			ds.(*leveldb.Datastore).Close()
-
+		Destroy: func() {
 			d, err := homedir.Expand(spec.Params["DataDir"].(string))
 			if err != nil {
 				return
@@ -158,16 +168,23 @@ var CandidateLeveldb = func(spec options.WorkerDatastore) CandidateDatastore {
 
 var CandidateDs = func(spec options.WorkerDatastore) CandidateDatastore {
 	return CandidateDatastore{
-		Create: func() (ds.Batching, error) {
-			ds, ok := datastores[spec.Type]
+		Create: func() (func(bool) (ds.Batching, io.Closer, error), error) {
+			d, ok := datastores[spec.Type]
 			if !ok {
 				return nil, fmt.Errorf("unknows ds: '%s'", spec.Type)
 			}
 
-			return ds(spec).Create()
+			construct, err := d(spec).Create()
+			if err != nil {
+				return nil, err
+			}
+
+			return func(fast bool) (ds.Batching, io.Closer, error) {
+				return construct(fast)
+			}, nil
 		},
-		Destroy: func(d ds.Batching) {
-			datastores[spec.Type](spec).Destroy(d)
+		Destroy: func() {
+			datastores[spec.Type](spec).Destroy()
 		},
 	}
 }
