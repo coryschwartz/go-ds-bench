@@ -34,7 +34,7 @@ func (opt BenchOptions) TestDesc() string {
 
 var DefaultBenchOpts = OptionsRange2pow(
 	BenchOptions{1, 25 << 10, 64},
-	BenchOptions{1 << 18, 25 << 10, 64}, 7)
+	BenchOptions{1 << 18, 25 << 10, 64}, 8)
 
   // 20 / 25 / 13 is 1M / ~20G
 

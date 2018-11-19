@@ -2,12 +2,6 @@
   "Datastores": [
     {
       "Type": "flatfs",
-      "Name": "flatfs-nosync",
-      "Tags": ["persistent"],
-      "Params": {"DataDir": "~/ds-bench", "Sync": false}
-    },
-    {
-      "Type": "flatfs",
       "Name": "flatfs-ntfs",
       "Scripts": {
         "Pre": "scripts/fs_prerun.sh 'ntfs -f' /dev/nvme0n1p3 /ds-bench",

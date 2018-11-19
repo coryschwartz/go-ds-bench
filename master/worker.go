@@ -105,7 +105,7 @@ func (w *Worker) runSingle(spec options.TestSpec) (*parse.Benchmark, error) {
 		}
 	}
 
-	args := []string{"-test.benchtime=100ms", "-test.benchmem", "-test.bench", "BenchmarkSpec"}
+	args := []string{"-test.benchmem", "-test.bench", "BenchmarkSpec"}
 	cmd := exec.Command(workerBin, args...)
 	cmd.Dir = wd
 	cmd.Stderr = os.Stderr

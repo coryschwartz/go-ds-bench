@@ -31,7 +31,7 @@ func main() {
 }
 
 func run(w []*master.Worker) {
-	//assert(master.BenchBasicGet(w))
+	assert(master.BenchBasicGet(w))
 	//assert(master.BenchBasicHas(w))
 	//assert(master.BenchBasicAdd(w))
 	assert(master.BenchBasicAddBatch(w))
