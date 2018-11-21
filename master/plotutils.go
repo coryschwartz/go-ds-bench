@@ -45,7 +45,7 @@ var yselAllocs = &ysel{
 var yselAlocKB = &ysel{
 	name: "allocKBs/op",
 	sel: func(b *parse.Benchmark) float64 {
-		return float64(b.AllocedBytesPerOp)/ 1024.0
+		return float64(b.AllocedBytesPerOp) / 1024.0
 	},
 }
 
@@ -74,7 +74,7 @@ func (t Log2Ticks) Ticks(min, max float64) []plot.Tick {
 	var ticks []plot.Tick
 	for val < max {
 		for i := 1; i < 4; i++ {
-			if i == 1{
+			if i == 1 {
 				ticks = append(ticks, plot.Tick{Value: val, Label: formatFloatTick(val)})
 			}
 			ticks = append(ticks, plot.Tick{Value: val * float64(i)})

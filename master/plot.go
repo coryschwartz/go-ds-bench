@@ -45,5 +45,5 @@ func (s *Series) plot(pathPrefix string, results map[string][]*parse.Benchmark, 
 
 	plotName := fmt.Sprintf("%s-%s-%s%s.png", s.PlotName, x.name, y.name, suffix)
 	plotName = strings.Replace(plotName, "/", "", -1)
-	return p.Save(8*vg.Inch, 6*vg.Inch, pathPrefix + plotName)
+	return p.Save(8*vg.Inch, 6*vg.Inch, pathPrefix+plotName)
 }

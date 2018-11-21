@@ -1,75 +1,46 @@
 package master
 
 import (
-	"log"
-
 	"github.com/ipfs/go-ds-bench/options"
 	"golang.org/x/tools/benchmark/parse"
 )
 
-func defaultBench(s *Series) error {
-	if err := s.benchSeries(NoTag("memory")); err != nil {
-		if err == ErrExists {
-			log.Printf("SKIPPING %s (using existing results)", s.PlotName)
-			if err := s.loadExistingResults(); err != nil {
-				return err
-			}
-		} else {
-			return err
-		}
-	}
-
-	return s.standardPlots()
-}
-
-func BenchBasicGet(w []*Worker) error {
-	testSeries := &Series{
+func BenchBasicGet() *Series {
+	return &Series{
 		Test:     "get",
 		PlotName: "get",
 		Opts:     options.DefaultBenchOpts,
 
-		Workers: w,
-		Results: map[string][]*parse.Benchmark{},
+		Results: map[string]map[int]*parse.Benchmark{},
 	}
-
-	return defaultBench(testSeries)
 }
 
-func BenchBasicHas(w []*Worker) error {
-	testSeries := &Series{
+func BenchBasicHas() *Series {
+	return &Series{
 		Test:     "has",
 		PlotName: "has",
 		Opts:     options.DefaultBenchOpts,
 
-		Workers: w,
-		Results: map[string][]*parse.Benchmark{},
+		Results: map[string]map[int]*parse.Benchmark{},
 	}
-
-	return defaultBench(testSeries)
 }
 
-func BenchBasicAdd(w []*Worker) error {
-	testSeries := &Series{
+func BenchBasicAdd() *Series {
+	return &Series{
 		Test:     "add",
 		PlotName: "add",
 		Opts:     options.DefaultBenchOpts,
 
-		Workers: w,
-		Results: map[string][]*parse.Benchmark{},
+		Results: map[string]map[int]*parse.Benchmark{},
 	}
-
-	return defaultBench(testSeries)
 }
 
-func BenchBasicAddBatch(w []*Worker) error {
-	testSeries := &Series{
+func BenchBasicAddBatch() *Series {
+	return &Series{
 		Test:     "add-batch",
 		PlotName: "add-batch",
 		Opts:     options.DefaultBenchOpts,
 
-		Workers: w,
-		Results: map[string][]*parse.Benchmark{},
+		Results: map[string]map[int]*parse.Benchmark{},
 	}
-
-	return defaultBench(testSeries)
 }

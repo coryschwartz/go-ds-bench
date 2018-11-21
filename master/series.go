@@ -5,29 +5,44 @@ import (
 	"errors"
 	"gonum.org/v1/plot"
 	"io/ioutil"
-	"log"
-	"os"
+	"sync"
 
 	"github.com/ipfs/go-ds-bench/options"
 
 	"golang.org/x/tools/benchmark/parse"
 )
 
-var Cont *bool
-
 var ErrExists = errors.New("results for this bench already exist")
 var errDone = errors.New("done")
 
 type Series struct {
 	Opts     []options.BenchOptions
-	Workers  []*Worker
 	Test     string // defined in Worker/worker_test.go
 	PlotName string
 
 	// ds -> Opts
-	Results map[string][]*parse.Benchmark
+	Results map[string]map[int]*parse.Benchmark
+
+	lk sync.Mutex
 }
 
+func (s *Series) todo(ds string) []int {
+	out := make([]int, 0, len(s.Opts))
+
+	if s.Results[ds] == nil {
+		s.Results[ds] = map[int]*parse.Benchmark{}
+	}
+
+	for n := range s.Opts {
+		if _, ok := s.Results[ds][n]; !ok {
+			out = append(out, n)
+		}
+	}
+
+	return out
+}
+
+/*
 func (s *Series) benchSeries(f ...DsFilter) error {
 	log.Printf("BEGIN %s", s.PlotName)
 	if _, err := os.Stat("results-" + s.PlotName + ".json"); !*Cont && !os.IsNotExist(err) {
@@ -69,7 +84,6 @@ func (s *Series) doSingle(f ...DsFilter) error {
 				}
 				s.Results[ds.Name] = append(s.Results[ds.Name], r)
 
-
 				log.Println("saving progress")
 				s.saveResults()
 				return nil
@@ -78,7 +92,7 @@ func (s *Series) doSingle(f ...DsFilter) error {
 	}
 
 	return errDone
-}
+}*/
 
 func (s *Series) saveResults() error {
 	b, err := json.Marshal(s)
@@ -88,6 +102,7 @@ func (s *Series) saveResults() error {
 	return ioutil.WriteFile("results-"+s.PlotName+".json", b, 0664)
 }
 
+/*
 func (s *Series) standardPlots() error {
 	os.Mkdir("x_plots", 0755)
 
@@ -143,7 +158,7 @@ func (s *Series) standardPlots() error {
 	}
 
 	return nil
-}
+}*/
 
 // doAvg averages items across category
 func (s *Series) doAvg(in map[string]map[string][]*parse.Benchmark) map[string][]*parse.Benchmark {
