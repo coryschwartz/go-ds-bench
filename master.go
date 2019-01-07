@@ -36,6 +36,7 @@ func main() {
 }
 
 func newSpec() (*master.BatchSpec, error) {
+	// Job matrix - systems x filesystems x datastores x series
 	datastores := []string{"flatfs", "badger", "leveldb", "bolt"}
 	filesystems := []fs{fsBtrfs, fsExt4, fsNtfs, fsJfs, fsXfs}
 	jobs := func() []*master.Series {
@@ -44,6 +45,7 @@ func newSpec() (*master.BatchSpec, error) {
 		}
 	}
 
+	// Load systems
 	systems := map[string][]master.Worker{}
 
 	f, err := os.Open("systems.json")
@@ -62,6 +64,7 @@ func newSpec() (*master.BatchSpec, error) {
 		Jobs: map[string][]*master.Series{},
 	}
 
+	// Populate jobs / Datastores
 	for system := range s.Workers {
 		s.Jobs[system] = jobs()
 	}
