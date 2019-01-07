@@ -73,6 +73,10 @@ func newSpec() (*master.BatchSpec, error) {
 				Name:    fmt.Sprintf("%s-%s", ds, fs.Name),
 				Scripts: fs.Scripts,
 				Tags:    []string{fs.Name},
+				Params: map[string]interface{}{
+					"Sync": true,
+					"DataDir": "MDIR",
+				},
 			})
 		}
 	}

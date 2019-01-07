@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ipfs/go-ds-bench/master/env"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -160,7 +160,7 @@ func (b *BatchSpec) Start() error {
 						}
 						_, err := worker.run(b.Datastores[wu.ds], b.Jobs[itype][wu.series], wu.point)
 						if err != nil {
-							log.Printf("UNHANDLED ERROR [%s-%d]: %s", itype, id, err)
+							panic(fmt.Errorf("UNHANDLED ERROR [%s-%d]: %s", itype, id, err))
 						}
 					case <-ctx.Done():
 						log.Printf("Stopping worker %s-%d (ctx expired)", itype, id)
@@ -205,62 +205,30 @@ func (w *Worker) replaceVars(s []string) []string {
 	return []string{s[0], s1}
 }
 
-type localEnv struct {
-	workDir string
+type Piper interface {
+	TeeReader(r io.Reader, w io.Writer) io.Reader
 }
 
-func initLocal(_ options.WorkerDatastore) (*localEnv, error) {
-	wd, err := ioutil.TempDir("/tmp", "dsbench-")
-	if err != nil {
-		return nil, err
-	}
-
-fmt.Fprintf(os.Stderr, wd)
-
-	return &localEnv{
-		workDir: wd,
-	}, nil
-}
-
-func (e *localEnv) WriteFile(filename string, data []byte, perm os.FileMode) error {
-	return ioutil.WriteFile(filepath.Join(e.workDir, filename), data, perm)
-}
-
-func (e *localEnv) CopyFile(local, filename string, perm os.FileMode) error {
-	b, err := ioutil.ReadFile(local)
-	if err != nil {
-		return err
-	}
-
-	return ioutil.WriteFile(filepath.Join(e.workDir, filename), b, perm)
-}
-
-func (e *localEnv) Close() {
-	os.Remove(e.workDir)
-}
-
-func (e *localEnv) Cmd(cmd string, args []string, sout io.Writer, serr io.Writer) func() error {
-	c := exec.Command(cmd, args...)
-	c.Stdout = sout
-	c.Stderr = serr
-	c.Dir = e.workDir
-	return c.Run
-}
-
-var envHandlers = map[string]func(options.WorkerDatastore)(*localEnv,error) {
-	"local": initLocal,
-}
-
-func (w *Worker) run(ds options.WorkerDatastore, series *Series, point int) (*parse.Benchmark, error) {
-
-	init, ok := envHandlers[w.Type]
+func (w *Worker) run(ids options.WorkerDatastore, series *Series, point int) (*parse.Benchmark, error) {
+	init, ok := env.Handlers[w.Type]
 	if !ok {
-		return nil, fmt.Errorf("unknown remote type: %s", ds.Type)
+		return nil, fmt.Errorf("unknown remote type: %s", w.Type)
 	}
 
-	env, err := init(ds)
+	env, err := init(w.Spec)
 	if err != nil {
 		return nil, err
+	}
+
+	var ds options.WorkerDatastore
+	if err := clone(&ids, &ds); err != nil {
+		return nil, err
+	}
+
+	for n, t := range ds.Params {
+		if sparam, ok := t.(string); ok {
+			ds.Params[n] = w.replaceVars([]string{"", sparam})[1]
+		}
 	}
 
 	spec := options.TestSpec{
@@ -289,7 +257,7 @@ func (w *Worker) run(ds options.WorkerDatastore, series *Series, point int) (*pa
 	if len(ds.Scripts.Pre) != 0 {
 		log.Printf("running pre-run script for datastore %s: %s", ds.Name, w.replaceVars(ds.Scripts.Pre))
 
-		run := env.Cmd("/usr/bin/env", []string{"bash", "-c", "./prerun.sh " + w.replaceVars(ds.Scripts.Pre)[1]}, os.Stdout, os.Stderr)
+		run := env.Cmd("/usr/bin/env", []string{"bash", "-c", "./prerun.sh " + w.replaceVars(ds.Scripts.Pre)[1]}, os.Stderr, os.Stderr)
 		if err := run(); err != nil {
 			return nil, err
 		}
@@ -298,17 +266,17 @@ func (w *Worker) run(ds options.WorkerDatastore, series *Series, point int) (*pa
 	args := []string{"-test.benchmem", "-test.bench", "BenchmarkSpec"}
 
 	pr, pw := io.Pipe()
-	defer pr.Close()
-	run := env.Cmd(workerBin, args, pw, os.Stderr)
+	run := env.Cmd("./worker.test", args, pw, os.Stderr)
 	sout := io.TeeReader(pr, os.Stderr)
 
-	w.log("start %s [cd %s; %s %s]", ds.Name, workerBin, strings.Join(args, " "))
+	w.log("start %s [%s]", ds.Name, strings.Join(args, " "))
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 
 	var rerr error
 	go func() {
+		defer pw.Close()
 		defer wg.Done()
 		rerr = run()
 	}()
@@ -325,14 +293,14 @@ func (w *Worker) run(ds options.WorkerDatastore, series *Series, point int) (*pa
 
 	if len(ds.Scripts.Post) != 0 {
 		log.Printf("running post-run script for datastore %s: %s", ds.Name, w.replaceVars(ds.Scripts.Post))
-		run := env.Cmd("/usr/bin/env", []string{"bash", "-c", "./postrun.sh " + w.replaceVars(ds.Scripts.Post)[1]}, os.Stdout, os.Stderr)
+		run := env.Cmd("/usr/bin/env", []string{"bash", "-c", "./postrun.sh " + w.replaceVars(ds.Scripts.Post)[1]}, os.Stderr, os.Stderr)
 		if err := run(); err != nil {
 			return nil, err
 		}
 	}
 
 	if len(bset) != 1 {
-		return nil, errors.New("unexpected bench count")
+		return nil, fmt.Errorf("unexpected bench count: %d", len(bset))
 	}
 
 	for _, b := range bset {
@@ -344,4 +312,10 @@ func (w *Worker) run(ds options.WorkerDatastore, series *Series, point int) (*pa
 	}
 
 	panic("shouldn't be here")
+}
+
+// HACK!
+func clone(in interface{}, out interface{}) error {
+	b, _ := json.Marshal(in)
+	return json.Unmarshal(b, out)
 }
