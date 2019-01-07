@@ -92,6 +92,7 @@ func BuildBatch(new func() (*BatchSpec, error), cont bool) (*BatchSpec, error) {
 	return new()
 }
 
+// wuQueue implements a chan based FIFO queue
 func wuQueue() struct {
 	in  chan<- workUnit
 	out <-chan workUnit
@@ -137,6 +138,7 @@ func (b *BatchSpec) Start() error {
 	ctx, done := context.WithCancel(context.Background())
 	defer done()
 
+	// workUnit queues per instance type
 	queues := map[string]struct {
 		in  chan<- workUnit
 		out <-chan workUnit
@@ -158,8 +160,10 @@ func (b *BatchSpec) Start() error {
 							log.Printf("Stopping worker %s-%d", itype, id)
 							return
 						}
+						// TODO: don't ignore results (_)
 						_, err := worker.run(b.Datastores[wu.ds], b.Jobs[itype][wu.series], wu.point)
 						if err != nil {
+							//TODO: figure this out
 							panic(fmt.Errorf("UNHANDLED ERROR [%s-%d]: %s", itype, id, err))
 						}
 					case <-ctx.Done():
@@ -190,6 +194,7 @@ func (b *BatchSpec) Start() error {
 	wg.Wait()
 
 	// TODO: grab errors
+	// TODO: port/call func (s *Series) standardPlots()
 	return nil
 }
 
