@@ -145,6 +145,6 @@ func (e *sshEnv) Cmd(cmd string, args []string, sout io.Writer, serr io.Writer) 
 
 		log.Printf("SSH RUN: %s", cmd+" "+strings.Join(escargs, " "))
 		defer s.Close()
-		return s.Run(fmt.Sprintf("cd '%s' && %s %s", e.workDir, cmd, " " + strings.Join(escargs, " ")))
+		return s.Run(fmt.Sprintf("cd '%s' && %s %s", e.workDir, cmd, " "+strings.Join(escargs, " ")))
 	}
 }

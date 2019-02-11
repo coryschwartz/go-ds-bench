@@ -37,8 +37,8 @@ func main() {
 
 func newSpec() (*master.BatchSpec, error) {
 	// Job matrix - systems x filesystems x datastores x series
-	datastores := []string{"flatfs", "badger", "leveldb", "bolt"}
-	filesystems := []fs{fsBtrfs, fsExt4, fsNtfs, fsJfs, fsXfs}
+	datastores := []string{"flatfs" /*, "badger", "leveldb", "bolt"*/}
+	filesystems := []fs{fsBtrfs, fsExt4 /*, fsNtfs, fsJfs, fsXfs*/}
 	jobs := func() []*master.Series {
 		return []*master.Series{
 			master.BenchBasicAddBatch(),
@@ -77,7 +77,7 @@ func newSpec() (*master.BatchSpec, error) {
 				Scripts: fs.Scripts,
 				Tags:    []string{fs.Name},
 				Params: map[string]interface{}{
-					"Sync": true,
+					"Sync":    true,
 					"DataDir": "MDIR",
 				},
 			})

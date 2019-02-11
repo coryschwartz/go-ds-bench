@@ -89,7 +89,12 @@ func BuildBatch(new func() (*BatchSpec, error), cont bool) (*BatchSpec, error) {
 		return &s, err
 	}
 
-	return new()
+	nspec, err := new()
+	if err != nil {
+		return &BatchSpec{}, err
+	}
+
+	return nspec, nspec.save()
 }
 
 // wuQueue implements a chan based FIFO queue
@@ -134,6 +139,39 @@ func wuQueue() struct {
 	}{in: in, out: out}
 }
 
+type result struct {
+	b   *parse.Benchmark
+	err error
+
+	instanceType string
+	wu           workUnit
+}
+
+func (b *BatchSpec) save() error {
+	// take all series locks
+	for _, ij := range b.Jobs {
+		for _, dj := range ij {
+			dj.lk.Lock()
+		}
+	}
+
+	defer func() {
+		for _, ij := range b.Jobs {
+			for _, dj := range ij {
+				dj.lk.Unlock()
+			}
+		}
+	}()
+
+	m, err := json.MarshalIndent(b, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+
+	//TODO: backups in case of borkage
+	return ioutil.WriteFile("results.json", m, 0664)
+}
+
 func (b *BatchSpec) Start() error {
 	ctx, done := context.WithCancel(context.Background())
 	defer done()
@@ -145,6 +183,7 @@ func (b *BatchSpec) Start() error {
 	}{}
 	var wg sync.WaitGroup
 
+	results := make(chan result)
 	for itype, workers := range b.Workers {
 		queues[itype] = wuQueue()
 
@@ -160,11 +199,13 @@ func (b *BatchSpec) Start() error {
 							log.Printf("Stopping worker %s-%d", itype, id)
 							return
 						}
-						// TODO: don't ignore results (_)
-						_, err := worker.run(b.Datastores[wu.ds], b.Jobs[itype][wu.series], wu.point)
-						if err != nil {
-							//TODO: figure this out
-							panic(fmt.Errorf("UNHANDLED ERROR [%s-%d]: %s", itype, id, err))
+						b, err := worker.run(b.Datastores[wu.ds], b.Jobs[itype][wu.series], wu.point)
+						results <- result{
+							b:   b,
+							err: err,
+
+							instanceType: itype,
+							wu:           wu,
 						}
 					case <-ctx.Done():
 						log.Printf("Stopping worker %s-%d (ctx expired)", itype, id)
@@ -191,9 +232,40 @@ func (b *BatchSpec) Start() error {
 		close(queues[itype].in)
 	}
 
-	wg.Wait()
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
 
-	// TODO: grab errors
+	for {
+		select {
+		case result, ok := <-results:
+			if !ok {
+				log.Printf("Stopping result collection (results chan closed)")
+				return b.standardPlots()
+			}
+
+			if result.err != nil {
+				// TODO: handle gracefully(-ier)
+				log.Printf("WORKER ERROR: %s", result.err)
+				break
+			}
+
+			series := b.Jobs[result.instanceType][result.wu.series]
+			series.lk.Lock()
+			series.Results[b.Datastores[result.wu.ds].Name][result.wu.point] = result.b
+
+			series.lk.Unlock()
+			if err := b.save(); err != nil {
+				return err
+			}
+
+		case <-ctx.Done():
+			log.Printf("Stopping result collection (ctx expired)")
+			return b.standardPlots()
+		}
+	}
+
 	// TODO: port/call func (s *Series) standardPlots()
 	return nil
 }
@@ -317,6 +389,72 @@ func (w *Worker) run(ids options.WorkerDatastore, series *Series, point int) (*p
 	}
 
 	panic("shouldn't be here")
+}
+
+func (b *BatchSpec) standardPlots() error {
+	os.Mkdir("x_plots", 0755)
+
+	for itype, srs := range b.Jobs {
+		os.Mkdir("x_plots/"+itype, 0755)
+
+		for _, s := range srs {
+			if err := benchPlots(s.PlotName, "x_plots/"+itype+"/", s.Opts, s.Results); err != nil {
+				return err
+			}
+		}
+	}
+
+	for itype, inst := range b.Jobs {
+
+		for _, series := range inst {
+			// tag -> ds_name
+			tagged := map[string]map[string]map[int]*parse.Benchmark{}
+			// type -> ds_name
+			typed := map[string]map[string]map[int]*parse.Benchmark{}
+
+			for _, ds := range b.Datastores {
+				if _, ok := typed[ds.Type]; !ok {
+					typed[ds.Type] = map[string]map[int]*parse.Benchmark{}
+				}
+				typed[ds.Type][ds.Name] = series.Results[ds.Name]
+
+				for _, tag := range ds.Tags {
+					if _, ok := tagged[tag]; !ok {
+						tagged[tag] = map[string]map[int]*parse.Benchmark{}
+					}
+					tagged[tag][ds.Name] = series.Results[ds.Name]
+				}
+			}
+
+			for t, res := range tagged {
+				os.Mkdir("x_plots/"+itype+"/tag-"+t, 0755)
+
+				if err := benchPlots(series.PlotName, "x_plots/"+itype+"/tag-"+t+"/", series.Opts, res); err != nil {
+					return err
+				}
+			}
+
+			for t, res := range typed {
+				os.Mkdir("x_plots/"+itype+"/ds-"+t, 0755)
+
+				if err := benchPlots(series.PlotName, "x_plots/"+itype+"/ds-"+t+"/", series.Opts, res); err != nil {
+					return err
+				}
+			}
+
+			os.Mkdir("x_plots/"+itype+"/tag--avg/", 0755)
+			if err := benchPlots(series.PlotName, "x_plots/"+itype+"/tag--avg/", series.Opts, series.doAvg(tagged)); err != nil {
+				return err
+			}
+
+			os.Mkdir("x_plots/"+itype+"/ds--avg/", 0755)
+			if err := benchPlots(series.PlotName, "x_plots/"+itype+"/ds--avg/", series.Opts, series.doAvg(typed)); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 // HACK!
