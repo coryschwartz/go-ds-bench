@@ -334,7 +334,7 @@ func (w *Worker) run(ids options.WorkerDatastore, series *Series, point int) (*p
 	if len(ds.Scripts.Pre) != 0 {
 		log.Printf("running pre-run script for datastore %s: %s", ds.Name, w.replaceVars(ds.Scripts.Pre))
 
-		run := env.Cmd("/usr/bin/env", []string{"bash", "-c", "./prerun.sh " + w.replaceVars(ds.Scripts.Pre)[1]}, os.Stderr, os.Stderr)
+		run := env.Cmd("/usr/bin/env", []string{"bash", "-c", "./prerun.sh " + w.replaceVars(ds.Scripts.Pre)[1]}, os.Stdout, os.Stdout)
 		if err := run(); err != nil {
 			return nil, err
 		}
@@ -343,7 +343,7 @@ func (w *Worker) run(ids options.WorkerDatastore, series *Series, point int) (*p
 	args := []string{"-test.benchmem", "-test.bench", "BenchmarkSpec"}
 
 	pr, pw := io.Pipe()
-	run := env.Cmd("./worker.test", args, pw, os.Stderr)
+	run := env.Cmd("./worker.test", args, pw, os.Stdout)
 	sout := io.TeeReader(pr, os.Stderr)
 
 	w.log("start %s [%s]", ds.Name, strings.Join(args, " "))
@@ -370,7 +370,7 @@ func (w *Worker) run(ids options.WorkerDatastore, series *Series, point int) (*p
 
 	if len(ds.Scripts.Post) != 0 {
 		log.Printf("running post-run script for datastore %s: %s", ds.Name, w.replaceVars(ds.Scripts.Post))
-		run := env.Cmd("/usr/bin/env", []string{"bash", "-c", "./postrun.sh " + w.replaceVars(ds.Scripts.Post)[1]}, os.Stderr, os.Stderr)
+		run := env.Cmd("/usr/bin/env", []string{"bash", "-c", "./postrun.sh " + w.replaceVars(ds.Scripts.Post)[1]}, os.Stdout, os.Stdout)
 		if err := run(); err != nil {
 			return nil, err
 		}

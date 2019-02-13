@@ -25,6 +25,11 @@ Open `master.go`, have a look at `newSpec` optionally adjusting it to run
 specific benchmarks. If it looks good, run `go run master.go -continue` and
 hope that it does it's thing.
 
+Make sure to install filesystem tools on workers:
+```bash
+sudo apt install e2fsprogs btrfs-progs jfsutils xfsprogs ntfs-3g f2fs-tools
+```
+
 #### "Architecture"
 
 Top level directory contains a few important parts:
