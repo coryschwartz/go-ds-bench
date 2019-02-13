@@ -5,29 +5,44 @@ import (
 	"errors"
 	"gonum.org/v1/plot"
 	"io/ioutil"
-	"log"
-	"os"
+	"sync"
 
 	"github.com/ipfs/go-ds-bench/options"
 
 	"golang.org/x/tools/benchmark/parse"
 )
 
-var Cont *bool
-
 var ErrExists = errors.New("results for this bench already exist")
 var errDone = errors.New("done")
 
 type Series struct {
 	Opts     []options.BenchOptions
-	Workers  []*Worker
 	Test     string // defined in Worker/worker_test.go
 	PlotName string
 
 	// ds -> Opts
-	Results map[string][]*parse.Benchmark
+	Results map[string]map[int]*parse.Benchmark
+
+	lk sync.Mutex
 }
 
+func (s *Series) todo(ds string) []int {
+	out := make([]int, 0, len(s.Opts))
+
+	if s.Results[ds] == nil {
+		s.Results[ds] = map[int]*parse.Benchmark{}
+	}
+
+	for n := range s.Opts {
+		if _, ok := s.Results[ds][n]; !ok {
+			out = append(out, n)
+		}
+	}
+
+	return out
+}
+
+/*
 func (s *Series) benchSeries(f ...DsFilter) error {
 	log.Printf("BEGIN %s", s.PlotName)
 	if _, err := os.Stat("results-" + s.PlotName + ".json"); !*Cont && !os.IsNotExist(err) {
@@ -69,7 +84,6 @@ func (s *Series) doSingle(f ...DsFilter) error {
 				}
 				s.Results[ds.Name] = append(s.Results[ds.Name], r)
 
-
 				log.Println("saving progress")
 				s.saveResults()
 				return nil
@@ -78,7 +92,7 @@ func (s *Series) doSingle(f ...DsFilter) error {
 	}
 
 	return errDone
-}
+}*/
 
 func (s *Series) saveResults() error {
 	b, err := json.Marshal(s)
@@ -88,69 +102,13 @@ func (s *Series) saveResults() error {
 	return ioutil.WriteFile("results-"+s.PlotName+".json", b, 0664)
 }
 
-func (s *Series) standardPlots() error {
-	os.Mkdir("x_plots", 0755)
-
-	if err := s.benchPlots("x_plots/", s.Results); err != nil {
-		return err
-	}
-
-	// tag -> ds_name
-	tagged := map[string]map[string][]*parse.Benchmark{}
-	// type -> ds_name
-	typed := map[string]map[string][]*parse.Benchmark{}
-
-	for _, w := range s.Workers {
-		for _, ds := range w.Spec.Datastores {
-			if _, ok := typed[ds.Type]; !ok {
-				typed[ds.Type] = map[string][]*parse.Benchmark{}
-			}
-			typed[ds.Type][ds.Name] = s.Results[ds.Name]
-
-			for _, tag := range ds.Tags {
-				if _, ok := tagged[tag]; !ok {
-					tagged[tag] = map[string][]*parse.Benchmark{}
-				}
-				tagged[tag][ds.Name] = s.Results[ds.Name]
-			}
-		}
-	}
-
-	for t, res := range tagged {
-		os.Mkdir("x_plots/tag-"+t, 0755)
-
-		if err := s.benchPlots("x_plots/tag-"+t+"/", res); err != nil {
-			return err
-		}
-	}
-
-	for t, res := range typed {
-		os.Mkdir("x_plots/ds-"+t, 0755)
-
-		if err := s.benchPlots("x_plots/ds-"+t+"/", res); err != nil {
-			return err
-		}
-	}
-
-	os.Mkdir("x_plots/tag--avg/", 0755)
-	if err := s.benchPlots("x_plots/tag--avg/", s.doAvg(tagged)); err != nil {
-		return err
-	}
-
-	os.Mkdir("x_plots/ds--avg/", 0755)
-	if err := s.benchPlots("x_plots/ds--avg/", s.doAvg(typed)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // doAvg averages items across category
-func (s *Series) doAvg(in map[string]map[string][]*parse.Benchmark) map[string][]*parse.Benchmark {
-	out := map[string][]*parse.Benchmark{}
+//TODO: verify it works properly after map results refactor
+func (s *Series) doAvg(in map[string]map[string]map[int]*parse.Benchmark) map[string]map[int]*parse.Benchmark {
+	out := map[string]map[int]*parse.Benchmark{}
 
 	for cat, items := range in {
-		avg := make([]*parse.Benchmark, len(s.Opts))
+		avg := make(map[int]*parse.Benchmark, len(s.Opts))
 		for i := range s.Opts {
 			avg[i] = &parse.Benchmark{}
 		}
@@ -173,36 +131,36 @@ func (s *Series) doAvg(in map[string]map[string][]*parse.Benchmark) map[string][
 	return out
 }
 
-func (s *Series) benchPlots(path string, results map[string][]*parse.Benchmark) error {
-	if err := s.plot(path, results, xselPrimeRecs, yselNsPerOp, plot.LinearScale{}, TimeTicks{plot.DefaultTicks{}}, ""); err != nil {
+func benchPlots(plotName string, path string, bopts []options.BenchOptions, results map[string]map[int]*parse.Benchmark) error {
+	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselNsPerOp, plot.LinearScale{}, TimeTicks{plot.DefaultTicks{}}, ""); err != nil {
 		return err
 	}
 
-	if err := s.plot(path, results, xselPrimeRecs, yselNsPerOp, ZeroLogScale{}, TimeTicks{Log2Ticks{}}, "-log"); err != nil {
+	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselNsPerOp, ZeroLogScale{}, TimeTicks{Log2Ticks{}}, "-log"); err != nil {
 		return err
 	}
 
-	if err := s.plot(path, results, xselPrimeRecs, yselAllocs, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
+	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselAllocs, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
 		return err
 	}
 
-	if err := s.plot(path, results, xselPrimeRecs, yselAllocs, ZeroLogScale{}, Log2Ticks{}, "-log"); err != nil {
+	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselAllocs, ZeroLogScale{}, Log2Ticks{}, "-log"); err != nil {
 		return err
 	}
 
-	if err := s.plot(path, results, xselPrimeRecs, yselAlocKB, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
+	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselAlocKB, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
 		return err
 	}
 
-	if err := s.plot(path, results, xselPrimeRecs, yselAlocKB, ZeroLogScale{}, Log2Ticks{}, "-log"); err != nil {
+	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselAlocKB, ZeroLogScale{}, Log2Ticks{}, "-log"); err != nil {
 		return err
 	}
 
-	if err := s.plot(path, results, xselPrimeRecs, yselMBps, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
+	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselMBps, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
 		return err
 	}
 
-	if err := s.plot(path, results, xselPrimeRecs, yselMBps, ZeroLogScale{}, Log2Ticks{}, "-log"); err != nil {
+	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselMBps, ZeroLogScale{}, Log2Ticks{}, "-log"); err != nil {
 		return err
 	}
 	return nil

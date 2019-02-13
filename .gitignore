@@ -26,5 +26,7 @@ bolt
 flatfs
 sbs
 
+systems.json
+
 plot*.png
 results*json

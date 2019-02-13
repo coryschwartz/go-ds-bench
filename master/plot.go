@@ -2,6 +2,7 @@ package master
 
 import (
 	"fmt"
+	"github.com/ipfs/go-ds-bench/options"
 	"strings"
 
 	"golang.org/x/tools/benchmark/parse"
@@ -11,13 +12,13 @@ import (
 	"gonum.org/v1/plot/vg"
 )
 
-func (s *Series) plot(pathPrefix string, results map[string][]*parse.Benchmark, x *xsel, y *ysel, yscale plot.Normalizer, ymarker plot.Ticker, suffix string) error {
+func genplots(plotName string, pathPrefix string, bopts []options.BenchOptions, results map[string]map[int]*parse.Benchmark, x *xsel, y *ysel, yscale plot.Normalizer, ymarker plot.Ticker, suffix string) error {
 	p, err := plot.New()
 	if err != nil {
 		return err
 	}
 
-	p.Title.Text = s.PlotName
+	p.Title.Text = plotName
 	p.Y.Label.Text = y.name
 	p.X.Label.Text = x.name
 	p.X.Scale = ZeroLogScale{}
@@ -30,10 +31,10 @@ func (s *Series) plot(pathPrefix string, results map[string][]*parse.Benchmark, 
 
 	var lp []interface{}
 	for dsname, p := range results {
-		pts := make(plotter.XYs, len(s.Opts))
+		pts := make(plotter.XYs, len(p))
 
 		for n, bench := range p {
-			pts[n].X = x.sel(s.Opts[n])
+			pts[n].X = x.sel(bopts[n])
 			pts[n].Y = y.sel(bench)
 		}
 		lp = append(lp, dsname, pts)
@@ -43,7 +44,7 @@ func (s *Series) plot(pathPrefix string, results map[string][]*parse.Benchmark, 
 		return err
 	}
 
-	plotName := fmt.Sprintf("%s-%s-%s%s.png", s.PlotName, x.name, y.name, suffix)
+	plotName = fmt.Sprintf("%s-%s-%s%s.png", plotName, x.name, y.name, suffix)
 	plotName = strings.Replace(plotName, "/", "", -1)
-	return p.Save(8*vg.Inch, 6*vg.Inch, pathPrefix + plotName)
+	return p.Save(8*vg.Inch, 6*vg.Inch, pathPrefix+plotName)
 }
