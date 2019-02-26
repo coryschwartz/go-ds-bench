@@ -7,7 +7,14 @@
   "gx": {
     "dvcsimport": "github.com/Kubuxu/go-ds-bench"
   },
-  "gxDependencies": [],
+  "gxDependencies": [
+    {
+      "author": "mitchellh",
+      "hash": "QmdcULN1WCzgoQmcCaUAmEhwcxHYsDrbZ2LvRJKCL8dMrK",
+      "name": "go-homedir",
+      "version": "1.0.0"
+    }
+  ],
   "gxVersion": "0.10.0",
   "language": "go",
   "license": "",
