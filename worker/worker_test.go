@@ -3,6 +3,7 @@ package worker
 import (
 	"encoding/json"
 	"github.com/ipfs/go-ds-bench/options"
+	"github.com/ipfs/go-ds-bench/worker/benches/basic"
 	"io/ioutil"
 	"testing"
 )
@@ -20,13 +21,13 @@ func BenchmarkSpec(b *testing.B) {
 
 	switch spec.Test {
 	case "get":
-		RunBench(b, BenchGet, CandidateDs(spec.Datastore), spec.Options)
+		RunBench(b, basic.BenchGet, CandidateDs(spec.Datastore), spec.Options)
 	case "has":
-		RunBench(b, BenchHas, CandidateDs(spec.Datastore), spec.Options)
+		RunBench(b, basic.BenchHas, CandidateDs(spec.Datastore), spec.Options)
 	case "add":
-		RunBench(b, BenchAdd, CandidateDs(spec.Datastore), spec.Options)
+		RunBench(b, basic.BenchAdd, CandidateDs(spec.Datastore), spec.Options)
 	case "add-batch":
-		RunBench(b, BenchAddBatch, CandidateDs(spec.Datastore), spec.Options)
+		RunBench(b, basic.BenchAddBatch, CandidateDs(spec.Datastore), spec.Options)
 	default:
 		b.Fatalf("unknown test '%s'", spec.Test)
 	}

@@ -1,34 +1,37 @@
-package worker
+package basic
 
 import (
 	"github.com/ipfs/go-ds-bench/options"
+	"github.com/ipfs/go-ds-bench/worker/helpers"
 	"github.com/remeh/sizedwaitgroup"
 	"testing"
 
 	ds "github.com/ipfs/go-datastore"
 )
 
-func BenchGet(b *testing.B, store ds.Batching, opt options.BenchOptions) {
+func BenchHas(b *testing.B, store ds.Batching, opt options.BenchOptions) {
 	buf := make([]byte, opt.RecordSize)
 	keys := make([]ds.Key, b.N)
 	swg := sizedwaitgroup.New(256)
 
 	for i := 0; i < b.N; i++ {
-		buf = RandomBuf(opt.RecordSize)
+		buf = helpers.RandomBuf(opt.RecordSize)
 		keys[i] = ds.RandomKey()
 
-		swg.Add()
-		go func(i int) {
-			store.Put(keys[i], buf)
-			swg.Done()
-		}(i)
+		if i%2 == 0 {
+			swg.Add()
+			go func(i int) {
+				swg.Done()
+				store.Put(keys[i], buf)
+			}(i)
+		}
 	}
 	swg.Wait()
 
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		_, err := store.Get(keys[i])
+		_, err := store.Has(keys[i])
 		if err != nil {
 			b.Fatal(err)
 		}
