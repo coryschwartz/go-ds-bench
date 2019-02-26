@@ -26,7 +26,7 @@ func BenchHas(b *testing.B, store ds.Batching, opt options.BenchOptions) {
 		if i%2 == 0 {
 			swg.Add()
 			go func(i int) {
-				swg.Done()
+				defer swg.Done()
 				store.Put(keys[i], buf)
 			}(i)
 		}

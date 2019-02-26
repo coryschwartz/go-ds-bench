@@ -26,8 +26,8 @@ func BenchGet(b *testing.B, store ds.Batching, opt options.BenchOptions) {
 
 		swg.Add()
 		go func(i int) {
+			defer swg.Done()
 			store.Put(keys[i], buf)
-			swg.Done()
 		}(i)
 	}
 	swg.Wait()
