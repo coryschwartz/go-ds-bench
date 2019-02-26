@@ -26,6 +26,8 @@ func RunBench(b *testing.B, bf BenchFunc, store CandidateDatastore, opt options.
 		closer.Close()
 		syscall.Sync()
 
+		//todo: consider drop buffers
+
 		s, closer, err = newStore(false)
 		if err != nil {
 			b.Fatal(err)
