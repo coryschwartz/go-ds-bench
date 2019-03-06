@@ -115,14 +115,16 @@ func (s *Series) doAvg(in map[string]map[string]map[int]*parse.Benchmark) map[st
 
 		for _, e := range items {
 			for i, bench := range e {
-				avg[i].AllocedBytesPerOp += bench.AllocedBytesPerOp / uint64(len(items))
-				avg[i].AllocsPerOp += bench.AllocsPerOp / uint64(len(items))
-				//bench.N
-				//bench.Name
-				avg[i].NsPerOp += bench.NsPerOp / float64(len(items))
-				avg[i].MBPerS += bench.MBPerS / float64(len(items))
-				//bench.Measured
-				//bench.Ord
+				if bench != nil { //TODO: might skew results, warn or something
+					avg[i].AllocedBytesPerOp += bench.AllocedBytesPerOp / uint64(len(items))
+					avg[i].AllocsPerOp += bench.AllocsPerOp / uint64(len(items))
+					// bench.N
+					// bench.Name
+					avg[i].NsPerOp += bench.NsPerOp / float64(len(items))
+					avg[i].MBPerS += bench.MBPerS / float64(len(items))
+					// bench.Measured
+					// bench.Ord
+				}
 			}
 		}
 		out[cat] = avg
@@ -132,36 +134,52 @@ func (s *Series) doAvg(in map[string]map[string]map[int]*parse.Benchmark) map[st
 }
 
 func benchPlots(plotName string, path string, bopts []options.BenchOptions, results map[string]map[int]*parse.Benchmark) error {
-	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselNsPerOp, plot.LinearScale{}, TimeTicks{plot.DefaultTicks{}}, ""); err != nil {
-		return err
+	var sels []*xsel
+
+	if bopts[0].BatchSize != bopts[1].BatchSize {
+		sels =append(sels, xselBatchSize)
 	}
 
-	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselNsPerOp, ZeroLogScale{}, TimeTicks{Log2Ticks{}}, "-log"); err != nil {
-		return err
+	if bopts[0].RecordSize != bopts[1].RecordSize {
+		sels =append(sels, xselRecordSize)
 	}
 
-	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselAllocs, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
-		return err
+	if bopts[0].PrimeRecordCount != bopts[1].PrimeRecordCount {
+		sels =append(sels, xselPrimeRecs)
 	}
 
-	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselAllocs, ZeroLogScale{}, Log2Ticks{}, "-log"); err != nil {
-		return err
-	}
+	for _, ixsel := range sels {
+		if err := genplots(plotName, path, bopts, results, ixsel, yselNsPerOp, plot.LinearScale{}, TimeTicks{plot.DefaultTicks{}}, ""); err != nil {
+			return err
+		}
 
-	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselAlocKB, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
-		return err
-	}
+		if err := genplots(plotName, path, bopts, results, ixsel, yselNsPerOp, ZeroLogScale{}, TimeTicks{Log2Ticks{}}, "-log"); err != nil {
+			return err
+		}
 
-	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselAlocKB, ZeroLogScale{}, Log2Ticks{}, "-log"); err != nil {
-		return err
-	}
+		if err := genplots(plotName, path, bopts, results, ixsel, yselAllocs, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
+			return err
+		}
 
-	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselMBps, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
-		return err
-	}
+		if err := genplots(plotName, path, bopts, results, ixsel, yselAllocs, ZeroLogScale{}, Log2Ticks{}, "-log"); err != nil {
+			return err
+		}
 
-	if err := genplots(plotName, path, bopts, results, xselPrimeRecs, yselMBps, ZeroLogScale{}, Log2Ticks{}, "-log"); err != nil {
-		return err
+		if err := genplots(plotName, path, bopts, results, ixsel, yselAlocKB, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
+			return err
+		}
+
+		if err := genplots(plotName, path, bopts, results, ixsel, yselAlocKB, ZeroLogScale{}, Log2Ticks{}, "-log"); err != nil {
+			return err
+		}
+
+		if err := genplots(plotName, path, bopts, results, ixsel, yselMBps, plot.LinearScale{}, plot.DefaultTicks{}, ""); err != nil {
+			return err
+		}
+
+		if err := genplots(plotName, path, bopts, results, ixsel, yselMBps, ZeroLogScale{}, Log2Ticks{}, "-log"); err != nil {
+			return err
+		}
 	}
 	return nil
 }

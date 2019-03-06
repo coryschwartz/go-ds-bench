@@ -56,6 +56,20 @@ var xselPrimeRecs = &xsel{
 	},
 }
 
+var xselRecordSize = &xsel{
+	name: "record-size",
+	sel: func(opt options.BenchOptions) float64 {
+		return float64(opt.RecordSize)
+	},
+}
+
+var xselBatchSize = &xsel{
+	name: "batchsize",
+	sel: func(opt options.BenchOptions) float64 {
+		return float64(opt.BatchSize)
+	},
+}
+
 type Log2Ticks struct{}
 
 var _ plot.Ticker = Log2Ticks{}

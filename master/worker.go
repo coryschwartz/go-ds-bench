@@ -129,6 +129,7 @@ func wuQueue() struct {
 				todo = append(todo, wu)
 			case out <- todo[len(todo)-1]:
 				todo = todo[:len(todo)-1]
+				fmt.Printf("\x1b[32m~~~~~~~~ %d JOBS LEFT ~~~~~~~~\x1b[39m\n", len(todo))
 			}
 		}
 	}()
@@ -248,7 +249,6 @@ func (b *BatchSpec) Start() error {
 			if result.err != nil {
 				// TODO: handle gracefully(-ier)
 				log.Printf("WORKER ERROR: %s", result.err)
-				break
 			}
 
 			series := b.Jobs[result.instanceType][result.wu.series]
@@ -453,6 +453,8 @@ func (b *BatchSpec) standardPlots() error {
 			}
 		}
 	}
+
+	plotWg.Wait()
 
 	return nil
 }

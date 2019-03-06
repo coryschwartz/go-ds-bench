@@ -42,6 +42,16 @@ func newSpec() (*master.BatchSpec, error) {
 	jobs := func() []*master.Series {
 		return []*master.Series{
 			master.BenchBasicAddBatch(),
+			master.BenchBasicAdd(),
+			master.BenchBasicGet(),
+			master.BenchBasicHas(),
+
+			master.BenchBSizingAddBatch(),
+			master.BenchBSizingAdd(),
+			master.BenchBSizingGet(),
+			master.BenchBSizingHas(),
+
+			master.BenchAddBatch(),
 		}
 	}
 
