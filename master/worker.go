@@ -396,9 +396,10 @@ func (b *BatchSpec) standardPlots() error {
 
 	for itype, srs := range b.Jobs {
 		os.Mkdir("x_plots/"+itype, 0755)
+		os.Mkdir("x_plots/"+itype+"/combined", 0755)
 
 		for _, s := range srs {
-			if err := benchPlots(s.PlotName, "x_plots/"+itype+"/", s.Opts, s.Results); err != nil {
+			if err := benchPlots(s.PlotName, "x_plots/"+itype+"/combined/", s.Opts, s.Results); err != nil {
 				return err
 			}
 		}

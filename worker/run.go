@@ -33,11 +33,11 @@ func RunBench(b *testing.B, bf BenchFunc, store CandidateDatastore, opt options.
 			b.Fatal(err)
 		}
 
-		free, err := constrainTo(2 << 30) // 2G
+		/*free, err := constrainTo(2 << 30) // 2G
 		if err != nil {
 			b.Fatal(err)
 		}
-		defer free()
+		defer free()*/
 
 		b.ResetTimer()
 		bf(b, s, opt)

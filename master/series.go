@@ -134,18 +134,18 @@ func (s *Series) doAvg(in map[string]map[string]map[int]*parse.Benchmark) map[st
 }
 
 func benchPlots(plotName string, path string, bopts []options.BenchOptions, results map[string]map[int]*parse.Benchmark) error {
-	var sels []*xsel
+	sels := map[int]*xsel{}
 
-	if bopts[0].BatchSize != bopts[1].BatchSize {
-		sels =append(sels, xselBatchSize)
-	}
-
-	if bopts[0].RecordSize != bopts[1].RecordSize {
-		sels =append(sels, xselRecordSize)
-	}
-
-	if bopts[0].PrimeRecordCount != bopts[1].PrimeRecordCount {
-		sels =append(sels, xselPrimeRecs)
+	for _, bopt := range bopts[1:] {
+		if bopts[0].BatchSize != bopt.BatchSize {
+			sels[0] = xselBatchSize
+		}
+		if bopts[0].RecordSize != bopt.RecordSize {
+			sels[1] = xselRecordSize
+		}
+		if bopts[0].PrimeRecordCount != bopt.PrimeRecordCount {
+			sels[2] = xselPrimeRecs
+		}
 	}
 
 	for _, ixsel := range sels {
