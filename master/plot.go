@@ -29,7 +29,7 @@ func (p *pt) Swap(i, j int) {
 	p.YErrors[i], p.YErrors[j] = p.YErrors[j], p.YErrors[i]
 }
 
-func genplots(plotName string, pathPrefix string, bopts []options.BenchOptions, results map[string]map[int]*parse.Benchmark, x *xsel, y *ysel, yscale plot.Normalizer, ymarker plot.Ticker, suffix string) error {
+func genplots(plotName string, pathPrefix string, bopts []options.BenchOptions, results map[string]map[int][]*parse.Benchmark, x *xsel, y *ysel, yscale plot.Normalizer, ymarker plot.Ticker, suffix string) error {
 	plotWg.Add(1)
 	go func() {
 		defer plotWg.Done()
@@ -57,15 +57,16 @@ func genplots(plotName string, pathPrefix string, bopts []options.BenchOptions, 
 			var pts pt
 			//pts := make(plotter.XYs, 0, len(p))
 
-			for n, bench := range p {
-				if bench != nil {
-					byX[x.sel(bopts[n])] = append(byX[x.sel(bopts[n])], y.sel(bench))
+			for n, benches := range p {
+				for _, bench := range benches {
+					if bench != nil {
+						byX[x.sel(bopts[n])] = append(byX[x.sel(bopts[n])], y.sel(bench))
+					}
 				}
 			}
 
 			for x, ys := range byX {
 				y, stddev := stat.MeanStdDev(ys, nil)
-				stat.Skew()
 
 				pts.XYs = append(pts.XYs, plotter.XY{
 					X: x,

@@ -103,27 +103,16 @@ func (s *Series) saveResults() error {
 }
 
 // doAvg averages items across category
-//TODO: verify it works properly after map results refactor
-func (s *Series) doAvg(in map[string]map[string]map[int]*parse.Benchmark) map[string]map[int]*parse.Benchmark {
-	out := map[string]map[int]*parse.Benchmark{}
+func (s *Series) doAvg(in map[string]map[string]map[int]*parse.Benchmark) map[string]map[int][]*parse.Benchmark {
+	out := map[string]map[int][]*parse.Benchmark{}
 
 	for cat, items := range in {
-		avg := make(map[int]*parse.Benchmark, len(s.Opts))
-		for i := range s.Opts {
-			avg[i] = &parse.Benchmark{}
-		}
+		avg := make(map[int][]*parse.Benchmark, len(s.Opts))
 
 		for _, e := range items {
 			for i, bench := range e {
-				if bench != nil { //TODO: might skew results, warn or something
-					avg[i].AllocedBytesPerOp += bench.AllocedBytesPerOp / uint64(len(items))
-					avg[i].AllocsPerOp += bench.AllocsPerOp / uint64(len(items))
-					// bench.N
-					// bench.Name
-					avg[i].NsPerOp += bench.NsPerOp / float64(len(items))
-					avg[i].MBPerS += bench.MBPerS / float64(len(items))
-					// bench.Measured
-					// bench.Ord
+				if bench != nil {
+					avg[i] = append(avg[i], bench)
 				}
 			}
 		}
@@ -133,7 +122,7 @@ func (s *Series) doAvg(in map[string]map[string]map[int]*parse.Benchmark) map[st
 	return out
 }
 
-func benchPlots(plotName string, path string, bopts []options.BenchOptions, results map[string]map[int]*parse.Benchmark) error {
+func benchPlots(plotName string, path string, bopts []options.BenchOptions, results map[string]map[int][]*parse.Benchmark) error {
 	sels := map[int]*xsel{}
 
 	for _, bopt := range bopts[1:] {

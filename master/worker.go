@@ -391,6 +391,17 @@ func (w *Worker) run(ids options.WorkerDatastore, series *Series, point int) (*p
 	panic("shouldn't be here")
 }
 
+func convertFlat(i map[string]map[int]*parse.Benchmark) map[string]map[int][]*parse.Benchmark {
+	out := map[string]map[int][]*parse.Benchmark{}
+	for k, a := range i {
+		out[k] = map[int][]*parse.Benchmark{}
+		for n, b := range a {
+			out[k][n] = []*parse.Benchmark{b}
+		}
+	}
+	return out
+}
+
 func (b *BatchSpec) standardPlots() error {
 	os.Mkdir("x_plots", 0755)
 
@@ -399,7 +410,9 @@ func (b *BatchSpec) standardPlots() error {
 		os.Mkdir("x_plots/"+itype+"/combined", 0755)
 
 		for _, s := range srs {
-			if err := benchPlots(s.PlotName, "x_plots/"+itype+"/combined/", s.Opts, s.Results); err != nil {
+
+
+			if err := benchPlots(s.PlotName, "x_plots/"+itype+"/combined/", s.Opts, convertFlat(s.Results)); err != nil {
 				return err
 			}
 		}
@@ -430,7 +443,7 @@ func (b *BatchSpec) standardPlots() error {
 			for t, res := range tagged {
 				os.Mkdir("x_plots/"+itype+"/tag-"+t, 0755)
 
-				if err := benchPlots(series.PlotName, "x_plots/"+itype+"/tag-"+t+"/", series.Opts, res); err != nil {
+				if err := benchPlots(series.PlotName, "x_plots/"+itype+"/tag-"+t+"/", series.Opts, convertFlat(res)); err != nil {
 					return err
 				}
 			}
@@ -438,7 +451,7 @@ func (b *BatchSpec) standardPlots() error {
 			for t, res := range typed {
 				os.Mkdir("x_plots/"+itype+"/ds-"+t, 0755)
 
-				if err := benchPlots(series.PlotName, "x_plots/"+itype+"/ds-"+t+"/", series.Opts, res); err != nil {
+				if err := benchPlots(series.PlotName, "x_plots/"+itype+"/ds-"+t+"/", series.Opts, convertFlat(res)); err != nil {
 					return err
 				}
 			}
