@@ -38,7 +38,7 @@ func main() {
 func newSpec() (*master.BatchSpec, error) {
 	// Job matrix - systems x filesystems x datastores x series
 	// datastores := []string{"flatfs", "badger", "leveldb", "bolt"}
-	datastores := []string{"flatfs", "leveldb"}
+	datastores := []string{"flatfs", "leveldb", "rados"}
 	// filesystems := []fs{fsBtrfs, fsExt4, fsExt3, fsNtfs, fsJfs, fsXfs}
 	filesystems := []fs{nofs}
 	jobs := func() []*master.Series {

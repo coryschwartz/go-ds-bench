@@ -1,4 +1,7 @@
 worker.test:
-	go test ./worker -c
+	go test -tags nautilus ./worker -c
 
-.PHONY: worker.test
+.PHONY: worker.test-nautilus-docker
+worker.test-nautilus-docker:
+	docker build -t go-ds-rados-builder .
+	docker run -v ${PWD}/out:/out go-ds-rados-builder

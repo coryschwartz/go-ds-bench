@@ -11,9 +11,12 @@ import (
 	"github.com/ipfs/go-ds-bench/options"
 
 	// boltds "github.com/ipfs/go-ds-bolt"
+
 	flatfs "github.com/ipfs/go-ds-flatfs"
 	leveldb "github.com/ipfs/go-ds-leveldb"
 	levelopt "github.com/syndtr/goleveldb/leveldb/opt"
+
+	radosds "github.com/coryschwartz/go-ds-rados"
 
 	"github.com/mitchellh/go-homedir"
 	// "gx/ipfs/QmdcULN1WCzgoQmcCaUAmEhwcxHYsDrbZ2LvRJKCL8dMrK/go-homedir"
@@ -32,6 +35,7 @@ var datastores = map[string]func(options.WorkerDatastore) CandidateDatastore{
 	// "badger":     CandidateBadger,
 	"leveldb": CandidateLeveldb,
 	// "bolt":       CandidateBolt,
+	"rados": CandidateRados,
 }
 
 var CandidateMemoryMap = func(options.WorkerDatastore) CandidateDatastore {
@@ -159,6 +163,36 @@ var CandidateLeveldb = func(spec options.WorkerDatastore) CandidateDatastore {
 
 				ldb, err := leveldb.NewDatastore(dir, &opts)
 				return ldb, ldb, err
+			}, nil
+		},
+		Destroy: func() {
+			d, err := homedir.Expand(spec.Params["DataDir"].(string))
+			if err != nil {
+				return
+			}
+
+			os.RemoveAll(d)
+		},
+	}
+}
+
+var CandidateRados = func(spec options.WorkerDatastore) CandidateDatastore {
+	return CandidateDatastore{
+		Create: func() (func(bool) (ds.Batching, io.Closer, error), error) {
+			cfg, ok := spec.Params["CephConfig"].(string)
+			if !ok {
+				return nil, fmt.Errorf("CephConfig is required")
+			}
+			pool, ok := spec.Params["CephPool"].(string)
+			if !ok {
+				return nil, fmt.Errorf("CephPool is required")
+			}
+			return func(bool) (ds.Batching, io.Closer, error) {
+				ds, err := radosds.NewDatastore(cfg, pool)
+				if err != nil {
+					return nil, nil, err
+				}
+				return ds, ds, nil
 			}, nil
 		},
 		Destroy: func() {
