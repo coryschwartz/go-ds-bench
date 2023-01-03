@@ -2,12 +2,13 @@ package master
 
 import (
 	"fmt"
-	"github.com/gonum/stat"
-	"github.com/ipfs/go-ds-bench/options"
 	"os"
 	"sort"
 	"strings"
 	"sync"
+
+	"github.com/gonum/stat"
+	"github.com/ipfs/go-ds-bench/options"
 
 	"golang.org/x/tools/benchmark/parse"
 	"gonum.org/v1/plot"
@@ -18,11 +19,12 @@ import (
 
 var plotWg sync.WaitGroup
 
-type pt struct{
+type pt struct {
 	plotter.XYs
 	plotter.YErrors
 }
-func (p *pt) Len() int { return len(p.XYs) }
+
+func (p *pt) Len() int           { return len(p.XYs) }
 func (p *pt) Less(i, j int) bool { return p.XYs[i].X < p.XYs[j].X }
 func (p *pt) Swap(i, j int) {
 	p.XYs[i], p.XYs[j] = p.XYs[j], p.XYs[i]
@@ -33,10 +35,7 @@ func genplots(plotName string, pathPrefix string, bopts []options.BenchOptions, 
 	plotWg.Add(1)
 	go func() {
 		defer plotWg.Done()
-		p, err := plot.New()
-		if err != nil {
-			panic(err)
-		}
+		p := plot.New()
 
 		p.Title.Text = plotName
 		p.Y.Label.Text = y.name
@@ -72,7 +71,7 @@ func genplots(plotName string, pathPrefix string, bopts []options.BenchOptions, 
 					X: x,
 					Y: y,
 				})
-				pts.YErrors = append(pts.YErrors, struct{ Low, High float64 }{Low: stddev/-2, High: stddev/2})
+				pts.YErrors = append(pts.YErrors, struct{ Low, High float64 }{Low: stddev / -2, High: stddev / 2})
 			}
 
 			sort.Sort(&pts)

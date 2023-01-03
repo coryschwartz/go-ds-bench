@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"context"
 	"math/rand"
 	"sync"
 	"testing"
@@ -15,10 +16,11 @@ func PrimeDS(tb testing.TB, store ds.Batching, count, blockSize int) {
 	if maxBatchCount > 2048 {
 		maxBatchCount = 2048
 	}
-	parallelism := 256
-	if _, ok := store.(ds.ThreadSafeDatastore); !ok {
-		parallelism = 1
-	}
+	// parallelism := 256
+	// if _, ok := store.(ds.ThreadSafeDatastore); !ok {
+	// 	parallelism = 1
+	// }
+	parallelism := 1
 	maxBatchCount = maxBatchCount / parallelism
 
 	var wg sync.WaitGroup
@@ -26,8 +28,9 @@ func PrimeDS(tb testing.TB, store ds.Batching, count, blockSize int) {
 	for i := 0; i < parallelism; i++ {
 		go func() {
 			defer wg.Done()
+			ctx := context.Background()
 			buf := make([]byte, blockSize)
-			b, err := store.Batch()
+			b, err := store.Batch(ctx)
 			if err != nil {
 				tb.Fatal(err)
 			}
@@ -37,24 +40,24 @@ func PrimeDS(tb testing.TB, store ds.Batching, count, blockSize int) {
 				if err != nil {
 					tb.Fatal(err)
 				}
-				err = b.Put(ds.RandomKey(), buf)
+				err = b.Put(ctx, ds.RandomKey(), buf)
 				if err != nil {
 					tb.Fatal(err)
 				}
 
 				if i%maxBatchCount == maxBatchCount-1 {
-					err = b.Commit()
+					err = b.Commit(ctx)
 					if err != nil {
 						tb.Fatal(err)
 					}
-					b, err = store.Batch()
+					b, err = store.Batch(ctx)
 					if err != nil {
 						tb.Fatal(err)
 					}
 				}
 			}
 
-			err = b.Commit()
+			err = b.Commit(ctx)
 			if err != nil {
 				tb.Fatal(err)
 			}

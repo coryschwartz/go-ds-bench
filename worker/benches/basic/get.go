@@ -2,17 +2,21 @@ package basic
 
 import "C"
 import (
+	"context"
+	"testing"
+
 	"github.com/ipfs/go-ds-bench/options"
 	"github.com/ipfs/go-ds-bench/worker/helpers"
 	"github.com/remeh/sizedwaitgroup"
-	"testing"
 
 	ds "github.com/ipfs/go-datastore"
 )
 
 func BenchGet(b *testing.B, store ds.Batching, opt options.BenchOptions) {
+	ctx := context.Background()
+
 	n := b.N
-	if n > opt.PrimeRecordCount / 5 {
+	if n > opt.PrimeRecordCount/5 {
 		n = opt.PrimeRecordCount / 5
 	}
 
@@ -27,7 +31,7 @@ func BenchGet(b *testing.B, store ds.Batching, opt options.BenchOptions) {
 		swg.Add()
 		go func(i int) {
 			defer swg.Done()
-			store.Put(keys[i], buf)
+			store.Put(ctx, keys[i], buf)
 		}(i)
 	}
 	swg.Wait()
@@ -35,7 +39,7 @@ func BenchGet(b *testing.B, store ds.Batching, opt options.BenchOptions) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		_, err := store.Get(keys[i % n])
+		_, err := store.Get(ctx, keys[i%n])
 		if err != nil {
 			b.Fatal(err)
 		}

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ipfs/go-ds-bench/master/env"
 	"io"
 	"io/ioutil"
 	"log"
@@ -13,6 +12,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/ipfs/go-ds-bench/master/env"
 
 	"github.com/ipfs/go-ds-bench/options"
 	"golang.org/x/tools/benchmark/parse"
@@ -351,11 +352,12 @@ func (w *Worker) run(ids options.WorkerDatastore, series *Series, point int) (*p
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	var rerr error
+	// var rerr error
 	go func() {
 		defer pw.Close()
 		defer wg.Done()
-		rerr = run()
+		// rerr = run()
+		run()
 	}()
 
 	w.log("parse")
@@ -410,7 +412,6 @@ func (b *BatchSpec) standardPlots() error {
 		os.Mkdir("x_plots/"+itype+"/combined", 0755)
 
 		for _, s := range srs {
-
 
 			if err := benchPlots(s.PlotName, "x_plots/"+itype+"/combined/", s.Opts, convertFlat(s.Results)); err != nil {
 				return err

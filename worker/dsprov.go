@@ -7,14 +7,16 @@ import (
 	"os"
 
 	ds "github.com/ipfs/go-datastore"
-	badgerds "github.com/ipfs/go-ds-badger"
+	// badgerds "github.com/ipfs/go-ds-badger"
 	"github.com/ipfs/go-ds-bench/options"
-	"github.com/ipfs/go-ds-bolt"
-	"github.com/ipfs/go-ds-flatfs"
-	"github.com/ipfs/go-ds-leveldb"
+
+	// boltds "github.com/ipfs/go-ds-bolt"
+	flatfs "github.com/ipfs/go-ds-flatfs"
+	leveldb "github.com/ipfs/go-ds-leveldb"
 	levelopt "github.com/syndtr/goleveldb/leveldb/opt"
 
-	"gx/ipfs/QmdcULN1WCzgoQmcCaUAmEhwcxHYsDrbZ2LvRJKCL8dMrK/go-homedir"
+	"github.com/mitchellh/go-homedir"
+	// "gx/ipfs/QmdcULN1WCzgoQmcCaUAmEhwcxHYsDrbZ2LvRJKCL8dMrK/go-homedir"
 )
 
 func nopCloser() {}
@@ -27,9 +29,9 @@ type CandidateDatastore struct {
 var datastores = map[string]func(options.WorkerDatastore) CandidateDatastore{
 	"memory-map": CandidateMemoryMap,
 	"flatfs":     CandidateFlatfs,
-	"badger":     CandidateBadger,
-	"leveldb":    CandidateLeveldb,
-	"bolt":       CandidateBolt,
+	// "badger":     CandidateBadger,
+	"leveldb": CandidateLeveldb,
+	// "bolt":       CandidateBolt,
 }
 
 var CandidateMemoryMap = func(options.WorkerDatastore) CandidateDatastore {
@@ -84,47 +86,47 @@ var CandidateFlatfs = func(spec options.WorkerDatastore) CandidateDatastore {
 	}
 }
 
-var CandidateBadger = func(spec options.WorkerDatastore) CandidateDatastore {
-	return CandidateDatastore{
-		Create: func() (func(bool) (ds.Batching, io.Closer, error), error) {
-			d, err := homedir.Expand(spec.Params["DataDir"].(string))
-			if err != nil {
-				return nil, err
-			}
+// var CandidateBadger = func(spec options.WorkerDatastore) CandidateDatastore {
+// 	return CandidateDatastore{
+// 		Create: func() (func(bool) (ds.Batching, io.Closer, error), error) {
+// 			d, err := homedir.Expand(spec.Params["DataDir"].(string))
+// 			if err != nil {
+// 				return nil, err
+// 			}
 
-			err = os.MkdirAll(d, 0775)
-			if err != nil {
-				return nil, err
-			}
+// 			err = os.MkdirAll(d, 0775)
+// 			if err != nil {
+// 				return nil, err
+// 			}
 
-			dir, err := ioutil.TempDir(d, "bench")
-			if err != nil {
-				return nil, err
-			}
+// 			dir, err := ioutil.TempDir(d, "bench")
+// 			if err != nil {
+// 				return nil, err
+// 			}
 
-			err = os.MkdirAll(dir, 0775)
-			if err != nil {
-				return nil, err
-			}
+// 			err = os.MkdirAll(dir, 0775)
+// 			if err != nil {
+// 				return nil, err
+// 			}
 
-			return func(fast bool) (ds.Batching, io.Closer, error) {
-				opts := badgerds.DefaultOptions
-				opts.SyncWrites = !fast && spec.Params["Sync"].(bool)
-				d, err := badgerds.NewDatastore(dir, &opts)
+// 			return func(fast bool) (ds.Batching, io.Closer, error) {
+// 				opts := badgerds.DefaultOptions
+// 				opts.SyncWrites = !fast && spec.Params["Sync"].(bool)
+// 				d, err := badgerds.NewDatastore(dir, &opts)
 
-				return d, d, err
-			}, nil
-		},
-		Destroy: func() {
-			d, err := homedir.Expand(spec.Params["DataDir"].(string))
-			if err != nil {
-				return
-			}
+// 				return d, d, err
+// 			}, nil
+// 		},
+// 		Destroy: func() {
+// 			d, err := homedir.Expand(spec.Params["DataDir"].(string))
+// 			if err != nil {
+// 				return
+// 			}
 
-			os.RemoveAll(d)
-		},
-	}
-}
+// 			os.RemoveAll(d)
+// 		},
+// 	}
+// }
 
 var CandidateLeveldb = func(spec options.WorkerDatastore) CandidateDatastore {
 	return CandidateDatastore{
@@ -170,44 +172,44 @@ var CandidateLeveldb = func(spec options.WorkerDatastore) CandidateDatastore {
 	}
 }
 
-var CandidateBolt = func(spec options.WorkerDatastore) CandidateDatastore {
-	return CandidateDatastore{
-		Create: func() (func(bool) (ds.Batching, io.Closer, error), error) {
-			d, err := homedir.Expand(spec.Params["DataDir"].(string))
-			if err != nil {
-				return nil, err
-			}
+// var CandidateBolt = func(spec options.WorkerDatastore) CandidateDatastore {
+// 	return CandidateDatastore{
+// 		Create: func() (func(bool) (ds.Batching, io.Closer, error), error) {
+// 			d, err := homedir.Expand(spec.Params["DataDir"].(string))
+// 			if err != nil {
+// 				return nil, err
+// 			}
 
-			err = os.MkdirAll(d, 0775)
-			if err != nil {
-				return nil, err
-			}
+// 			err = os.MkdirAll(d, 0775)
+// 			if err != nil {
+// 				return nil, err
+// 			}
 
-			dir, err := ioutil.TempDir(d, "bench")
-			if err != nil {
-				return nil, err
-			}
+// 			dir, err := ioutil.TempDir(d, "bench")
+// 			if err != nil {
+// 				return nil, err
+// 			}
 
-			err = os.MkdirAll(dir, 0775)
-			if err != nil {
-				return nil, err
-			}
+// 			err = os.MkdirAll(dir, 0775)
+// 			if err != nil {
+// 				return nil, err
+// 			}
 
-			return func(fast bool) (ds.Batching, io.Closer, error) {
-				d, err := boltds.NewBoltDatastore(dir, "test", fast || !spec.Params["Sync"].(bool))
-				return d, d, err
-			}, nil
-		},
-		Destroy: func() {
-			d, err := homedir.Expand(spec.Params["DataDir"].(string))
-			if err != nil {
-				return
-			}
+// 			return func(fast bool) (ds.Batching, io.Closer, error) {
+// 				d, err := boltds.NewBoltDatastore(dir, "test", fast || !spec.Params["Sync"].(bool))
+// 				return d, d, err
+// 			}, nil
+// 		},
+// 		Destroy: func() {
+// 			d, err := homedir.Expand(spec.Params["DataDir"].(string))
+// 			if err != nil {
+// 				return
+// 			}
 
-			os.RemoveAll(d)
-		},
-	}
-}
+// 			os.RemoveAll(d)
+// 		},
+// 	}
+// }
 
 var CandidateDs = func(spec options.WorkerDatastore) CandidateDatastore {
 	return CandidateDatastore{
